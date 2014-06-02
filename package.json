@@ -1,0 +1,54 @@
+{
+  "name": "ut_pex",
+  "description": "Extension for Peer Discovery (PEX)",
+  "version": "1.0.0",
+  "author": {
+    "name": "Travis Fischer",
+    "email": "fisch0920@gmail.com"
+  },
+  "dependencies": {
+    "bncode": "^0.5.0",
+    "compact2string": "^1.2.0",
+    "inherits": "^2.0.1",
+    "string2compact": "^1.1.1"
+  },
+  "devDependencies": {
+    "bittorrent-protocol": "^1.0.0",
+    "brfs": "^1.0.0",
+    "parse-torrent": "^1.0.0",
+    "tape": "^2.12.0"
+  },
+  "homepage": "http://webtorrent.io",
+  "keywords": [
+    "torrent",
+    "bittorrent",
+    "ut_pex",
+    "PEX",
+    "extension",
+    "Peer Exchange",
+    "discovery",
+    "p2p"
+  ],
+  "license": "MIT",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/fisch0920/ut_pex.git"
+  },
+  "bugs": {
+    "url": "https://github.com/fisch0920/ut_pex/issues"
+  },
+  "scripts": {
+    "test": "tape test/*.js"
+  },
+  "testling": {
+    "files": "test/*.js",
+    "browsers": [
+      "ie/9..latest",
+      "chrome/25..latest",
+      "firefox/20..latest",
+      "safari/6..latest",
+      "opera/15.0..latest"
+    ]
+  }
+}
