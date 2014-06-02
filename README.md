@@ -1,4 +1,4 @@
-# ut_pex [![travis](https://img.shields.io/travis/fisch0920/ut_pex.svg)](https://travis-ci.org/fisch0920/ut_pex) [![npm](https://img.shields.io/npm/v/ut_pex.svg)](https://npmjs.org/package/ut_pex) [![gittip](https://img.shields.io/gittip/fisch0920.svg)](https://www.gittip.com/fisch0920/)
+# ut_pex [![travis](https://img.shields.io/travis/fisch0920/ut_pex.svg)](https://travis-ci.org/fisch0920/ut_pex) [![npm](https://img.shields.io/npm/v/ut_pex.svg)](https://npmjs.org/package/ut_pex)
 
 ### BitTorrent Extension for Peer Discovery (PEX)
 
@@ -76,7 +76,7 @@ net.createServer(function (socket) {
 ### start
 
 Start sending regular PEX updates to the remote peer. Use `addPeer` and `dropPeer` to control the 
-content of PEX messages. PEX messages will be sent a little less than once per minute.
+content of PEX messages. PEX messages will be sent once every ~65 seconds.
 
 ```js
 wire.ut_pex.start()
