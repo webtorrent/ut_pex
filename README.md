@@ -57,12 +57,10 @@ net.createServer(function (socket) {
   // (optional) start sending peer information to remote peer
   wire.ut_pex.start()
 
-  // 'peer' event will fire for every new peer sent by the peer
+  // 'peer' event will fire for every new peer sent by the remote peer
   wire.ut_pex.on('peer', function (peer) {
     // got a peer
-
-    // Note: the event will not fire if the peer does not support ut_pex or if they
-    // simply don't respond.
+    // probably add it to peer connections queue
   })
 
   // handle handshake
@@ -101,6 +99,7 @@ Stops sending updates to the remote peer and resets internal state of peers seen
 
 ```js
 wire.ut_pex.reset()
+```
 
 ### addPeer
 
@@ -117,6 +116,8 @@ Adds a peer to the locally dropped peer list to send with the next PEX message.
 ```js
 wire.ut_pex.dropPeer('127.0.0.1:6889')
 ```
+
+## events
 
 ### event: 'peer'
 
