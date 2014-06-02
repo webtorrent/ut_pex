@@ -4,9 +4,9 @@
 
 [![browser support](https://ci.testling.com/fisch0920/ut_pex.png)](https://ci.testling.com/fisch0920/ut_pex)
 
-Node.js implementation of the [ut_pex protocol](http://www.rasterbar.com/products/libtorrent/extension_protocol.html), which is the most popular PEX (peer exchange) protocol used by bittorrent clients.
+Node.js implementation of the ut_pex protocol, which is the most popular PEX (peer exchange) protocol used by bittorrent clients.
 
-The purpose of this extension is to allow peers to exchange known peers directly with each other, thereby facilitating more efficient peer discovery and healthier swarms.
+The purpose of this extension is to allow peers to exchange known peers directly with each other, thereby facilitating more efficient peer discovery and healthier swarms.  The best description of the (nonstandardized) ut_pex protocol I could find is in section 2.1.4.3 of this [paper](http://www.di.unipi.it/~ricci/XR-EE-LCN_2010_010.pdf).
 
 Works in the browser with [browserify](http://browserify.org/)! This module is used by [WebTorrent](http://webtorrent.io).
 
