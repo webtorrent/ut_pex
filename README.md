@@ -149,6 +149,17 @@ wire.ut_pex.on('dropped', function (peer) {
 
 Note: the event will not fire if the peer does not support ut_pex or if they don't respond.
 
+## todo
+(prioritized highest to lowest)
+
+* ~~basic discovery~~
+* ~~basic advertisement~~
+* ~~basic unit tests~~
+* better unit tests
+* peer flag support
+* destroy wire if peer sends PEX messages too frequently
+* ipv6 support
+
 ## license
 
 MIT. Copyright (c) Travis Fischer
