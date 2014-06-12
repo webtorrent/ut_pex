@@ -8,7 +8,7 @@
 var EventEmitter = require('events').EventEmitter
 var compact2string = require('compact2string')
 var string2compact = require('string2compact')
-var bncode = require('bncode')
+var bencode = require('bencode')
 var inherits = require('inherits')
 
 var PEX_INTERVAL  = 65000 // just over one minute
@@ -105,7 +105,7 @@ module.exports = function () {
     var message
 
     try {
-      message = bncode.decode(buf)
+      message = bencode.decode(buf)
     } catch (err) {
       // drop invalid messages
       return

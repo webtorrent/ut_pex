@@ -83,7 +83,7 @@ wire.ut_pex.start()
 ```
 
 Note that ut_pex may be used for one-way peer discovery without sending PEX updates to the remote peer, 
-but this use case is discouraged because PEX, like bottorrent is more efficient through altruism.
+but this use case is discouraged because PEX, like bittorrent is more efficient through altruism.
 
 ### stop
 
