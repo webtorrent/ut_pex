@@ -1,7 +1,7 @@
 {
   "name": "ut_pex",
   "description": "Extension for Peer Discovery (PEX)",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "author": {
     "name": "Travis Fischer",
     "email": "fisch0920@gmail.com"
