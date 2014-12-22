@@ -28,6 +28,8 @@ module.exports = function () {
     self.reset()
   }
 
+  ut_pex.prototype.name = 'ut_pex'
+
   /**
    * Start sending regular PEX updates to remote peer.
    */
