@@ -14,8 +14,6 @@
   },
   "devDependencies": {
     "bittorrent-protocol": "^1.0.0",
-    "brfs": "^1.0.0",
-    "parse-torrent": "^1.0.0",
     "tape": "^3.5.0"
   },
   "homepage": "http://webtorrent.io",
