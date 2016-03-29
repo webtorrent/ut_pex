@@ -11,11 +11,10 @@ var string2compact = require('string2compact')
 var bencode = require('bencode')
 var inherits = require('inherits')
 
-var PEX_INTERVAL  = 65000 // just over one minute
+var PEX_INTERVAL = 65000 // just over one minute
 var PEX_MAX_PEERS = 50    // max number of peers to advertise per PEX message
 
 module.exports = function () {
-
   inherits(ut_pex, EventEmitter)
 
   function ut_pex (wire) {
@@ -37,6 +36,7 @@ module.exports = function () {
     var self = this
     clearInterval(self._intervalId)
     self._intervalId = setInterval(self._sendMessage.bind(self), PEX_INTERVAL)
+    if (self._intervalId.unref) self._intervalId.unref()
   }
 
   /**
@@ -115,6 +115,7 @@ module.exports = function () {
 
     if (message.added) {
       compact2string.multi(message.added).forEach(function (peer) {
+        delete self._remoteDroppedPeers[peer]
         if (!(peer in self._remoteAddedPeers)) {
           self._remoteAddedPeers[peer] = true
           self.emit('peer', peer)
@@ -125,8 +126,10 @@ module.exports = function () {
     if (message.dropped) {
       compact2string.multi(message.dropped).forEach(function (peer) {
         delete self._remoteAddedPeers[peer]
-        self._remoteDroppedPeers[peer] = true
-        self.emit('dropped', peer)
+        if (!(peer in self._remoteDroppedPeers)) {
+          self._remoteDroppedPeers[peer] = true
+          self.emit('dropped', peer)
+        }
       })
     }
   }
@@ -138,10 +141,10 @@ module.exports = function () {
   ut_pex.prototype._sendMessage = function () {
     var self = this
 
-    var localAdded   = Object.keys(self._localAddedPeers).slice(0, PEX_MAX_PEERS)
-    var localDropped = Object.keys(self._localAddedPeers).slice(0, PEX_MAX_PEERS)
+    var localAdded = Object.keys(self._localAddedPeers).slice(0, PEX_MAX_PEERS)
+    var localDropped = Object.keys(self._localDroppedPeers).slice(0, PEX_MAX_PEERS)
 
-    var added   = Buffer.concat(localAdded.map(string2compact))
+    var added = Buffer.concat(localAdded.map(string2compact))
     var dropped = Buffer.concat(localDropped.map(string2compact))
 
     var addedFlags = Buffer.concat(localAdded.map(function () {
