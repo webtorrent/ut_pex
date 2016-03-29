@@ -36,6 +36,7 @@ module.exports = function () {
     var self = this
     clearInterval(self._intervalId)
     self._intervalId = setInterval(self._sendMessage.bind(self), PEX_INTERVAL)
+    if (self._intervalId.unref) self._intervalId.unref()
   }
 
   /**
