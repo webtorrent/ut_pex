@@ -137,8 +137,8 @@ module.exports = function () {
   ut_pex.prototype._sendMessage = function () {
     var self = this
 
-    var localDropped = Object.keys(self._localAddedPeers).slice(0, PEX_MAX_PEERS)
     var localAdded = Object.keys(self._localAddedPeers).slice(0, PEX_MAX_PEERS)
+    var localDropped = Object.keys(self._localDroppedPeers).slice(0, PEX_MAX_PEERS)
 
     var added = Buffer.concat(localAdded.map(string2compact))
     var dropped = Buffer.concat(localDropped.map(string2compact))
