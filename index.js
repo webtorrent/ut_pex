@@ -114,6 +114,7 @@ module.exports = function () {
 
     if (message.added) {
       compact2string.multi(message.added).forEach(function (peer) {
+        delete self._remoteDroppedPeers[peer]
         if (!(peer in self._remoteAddedPeers)) {
           self._remoteAddedPeers[peer] = true
           self.emit('peer', peer)
@@ -124,8 +125,10 @@ module.exports = function () {
     if (message.dropped) {
       compact2string.multi(message.dropped).forEach(function (peer) {
         delete self._remoteAddedPeers[peer]
-        self._remoteDroppedPeers[peer] = true
-        self.emit('dropped', peer)
+        if (!(peer in self._remoteDroppedPeers)) {
+          self._remoteDroppedPeers[peer] = true
+          self.emit('dropped', peer)
+        }
       })
     }
   }
