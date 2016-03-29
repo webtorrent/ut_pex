@@ -7,14 +7,14 @@
     "email": "fisch0920@gmail.com"
   },
   "dependencies": {
-    "bencode": "^0.7.0",
+    "bencode": "^0.8.0",
     "compact2string": "^1.2.0",
     "inherits": "^2.0.1",
     "string2compact": "^1.1.1"
   },
   "devDependencies": {
-    "bittorrent-protocol": "^1.0.0",
-    "tape": "^3.5.0"
+    "bittorrent-protocol": "^2.1.2",
+    "tape": "^4.5.1"
   },
   "homepage": "http://webtorrent.io",
   "keywords": [
