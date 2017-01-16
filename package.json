@@ -7,7 +7,7 @@
     "email": "fisch0920@gmail.com"
   },
   "dependencies": {
-    "bencode": "^0.10.0",
+    "bencode": "^0.11.0",
     "compact2string": "^1.2.0",
     "inherits": "^2.0.1",
     "string2compact": "^1.1.1"
