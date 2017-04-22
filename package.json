@@ -3,8 +3,8 @@
   "description": "Extension for Peer Discovery (PEX)",
   "version": "1.1.3",
   "author": {
-    "name": "Travis Fischer",
-    "email": "fisch0920@gmail.com"
+    "name": "WebTorrent, LLC",
+    "email": "feross@webtorrent.io"
   },
   "dependencies": {
     "bencode": "^0.11.0",
@@ -17,7 +17,6 @@
     "tape": "^4.5.1",
     "standard": "*"
   },
-  "homepage": "http://webtorrent.io",
   "keywords": [
     "torrent",
     "bittorrent",
@@ -32,10 +31,10 @@
   "main": "index.js",
   "repository": {
     "type": "git",
-    "url": "git://github.com/fisch0920/ut_pex.git"
+    "url": "git://github.com/webtorrent/ut_pex.git"
   },
   "bugs": {
-    "url": "https://github.com/fisch0920/ut_pex/issues"
+    "url": "https://github.com/webtorrent/ut_pex/issues"
   },
   "scripts": {
     "test": "standard && tape test/*.js"

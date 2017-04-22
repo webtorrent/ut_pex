@@ -1,8 +1,15 @@
-# ut_pex [![travis](https://img.shields.io/travis/fisch0920/ut_pex.svg)](https://travis-ci.org/fisch0920/ut_pex) [![npm](https://img.shields.io/npm/v/ut_pex.svg)](https://npmjs.org/package/ut_pex)
+# ut_pex [![travis][travis-image]][travis-url] [![npm][npm-image]][npm-url] [![downloads][downloads-image]][downloads-url] [![javascript style guide][standard-image]][standard-url]
+
+[travis-image]: https://img.shields.io/travis/webtorrent/ut_pex/master.svg
+[travis-url]: https://travis-ci.org/webtorrent/ut_pex
+[npm-image]: https://img.shields.io/npm/v/ut_pex.svg
+[npm-url]: https://npmjs.org/package/ut_pex
+[downloads-image]: https://img.shields.io/npm/dm/ut_pex.svg
+[downloads-url]: https://npmjs.org/package/ut_pex
+[standard-image]: https://img.shields.io/badge/code_style-standard-brightgreen.svg
+[standard-url]: https://standardjs.com
 
 ### BitTorrent Extension for Peer Discovery (PEX)
-
-[![browser support](https://ci.testling.com/fisch0920/ut_pex.png)](https://ci.testling.com/fisch0920/ut_pex)
 
 Node.js implementation of the ut_pex protocol, which is the most popular PEX (peer exchange) protocol used by bittorrent clients.
 
@@ -75,14 +82,14 @@ net.createServer(function (socket) {
 
 ### start
 
-Start sending regular PEX updates to the remote peer. Use `addPeer` and `dropPeer` to control the 
+Start sending regular PEX updates to the remote peer. Use `addPeer` and `dropPeer` to control the
 content of PEX messages. PEX messages will be sent once every ~65 seconds.
 
 ```js
 wire.ut_pex.start()
 ```
 
-Note that ut_pex may be used for one-way peer discovery without sending PEX updates to the remote peer, 
+Note that ut_pex may be used for one-way peer discovery without sending PEX updates to the remote peer,
 but this use case is discouraged because PEX, like bittorrent is more efficient through altruism.
 
 ### stop
@@ -162,4 +169,4 @@ Note: the event will not fire if the peer does not support ut_pex or if they don
 
 ## license
 
-MIT. Copyright (c) Travis Fischer
+MIT. Copyright (c) Travis Fischer and [WebTorrent, LLC](https://webtorrent.io)

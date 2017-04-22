@@ -1,14 +1,14 @@
 /* jshint camelcase: false */
 
 var Protocol = require('bittorrent-protocol')
-var ut_pex = require('../')
+var utPex = require('../')
 var test = require('tape')
 
 test('wire.use(ut_pex())', function (t) {
   var wire = new Protocol()
   wire.pipe(wire)
 
-  wire.use(ut_pex())
+  wire.use(utPex())
 
   t.ok(wire.ut_pex)
   t.ok(wire.ut_pex.start)
@@ -22,4 +22,3 @@ test('wire.use(ut_pex())', function (t) {
 })
 
 // TODO: more thorough unit tests
-
