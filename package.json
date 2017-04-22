@@ -14,7 +14,8 @@
   },
   "devDependencies": {
     "bittorrent-protocol": "^2.1.2",
-    "tape": "^4.5.1"
+    "tape": "^4.5.1",
+    "standard": "*"
   },
   "homepage": "http://webtorrent.io",
   "keywords": [
@@ -37,16 +38,6 @@
     "url": "https://github.com/fisch0920/ut_pex/issues"
   },
   "scripts": {
-    "test": "tape test/*.js"
-  },
-  "testling": {
-    "files": "test/*.js",
-    "browsers": [
-      "ie/9..latest",
-      "chrome/25..latest",
-      "firefox/20..latest",
-      "safari/6..latest",
-      "opera/15.0..latest"
-    ]
+    "test": "standard && tape test/*.js"
   }
 }

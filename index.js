@@ -15,9 +15,9 @@ var PEX_INTERVAL = 65000 // just over one minute
 var PEX_MAX_PEERS = 50    // max number of peers to advertise per PEX message
 
 module.exports = function () {
-  inherits(ut_pex, EventEmitter)
+  inherits(utPex, EventEmitter)
 
-  function ut_pex (wire) {
+  function utPex (wire) {
     var self = this
     EventEmitter.call(self)
 
@@ -27,12 +27,12 @@ module.exports = function () {
     self.reset()
   }
 
-  ut_pex.prototype.name = 'ut_pex'
+  utPex.prototype.name = 'ut_pex'
 
   /**
    * Start sending regular PEX updates to remote peer.
    */
-  ut_pex.prototype.start = function () {
+  utPex.prototype.start = function () {
     var self = this
     clearInterval(self._intervalId)
     self._intervalId = setInterval(self._sendMessage.bind(self), PEX_INTERVAL)
@@ -42,7 +42,7 @@ module.exports = function () {
   /**
    * Stop sending PEX updates to the remote peer.
    */
-  ut_pex.prototype.stop = function () {
+  utPex.prototype.stop = function () {
     var self = this
     clearInterval(self._intervalId)
     self._intervalId = null
@@ -51,7 +51,7 @@ module.exports = function () {
   /**
    * Stops sending updates to the remote peer and resets internal state of peers seen.
    */
-  ut_pex.prototype.reset = function () {
+  utPex.prototype.reset = function () {
     var self = this
     self._remoteAddedPeers = {}
     self._remoteDroppedPeers = {}
@@ -63,7 +63,7 @@ module.exports = function () {
   /**
    * Adds a peer to the locally discovered peer list for the next PEX message.
    */
-  ut_pex.prototype.addPeer = function (peer) {
+  utPex.prototype.addPeer = function (peer) {
     var self = this
     if (peer.indexOf(':') < 0) return // disregard invalid peers
     if (peer in self._remoteAddedPeers) return // never advertise peer the remote wire already sent us
@@ -74,7 +74,7 @@ module.exports = function () {
   /**
    * Adds a peer to the locally dropped peer list for the next PEX message.
    */
-  ut_pex.prototype.dropPeer = function (peer) {
+  utPex.prototype.dropPeer = function (peer) {
     var self = this
     if (peer.indexOf(':') < 0) return // disregard invalid peers
     if (peer in self._remoteDroppedPeers) return // never advertise peer the remote wire already sent us
@@ -82,7 +82,7 @@ module.exports = function () {
     self._localDroppedPeers[peer] = true
   }
 
-  ut_pex.prototype.onExtendedHandshake = function (handshake) {
+  utPex.prototype.onExtendedHandshake = function (handshake) {
     var self = this
     if (!handshake.m || !handshake.m.ut_pex) {
       return self.emit('warning', new Error('Peer does not support ut_pex'))
@@ -102,7 +102,7 @@ module.exports = function () {
    *
    * @param {Buffer} buf bencoded PEX dictionary
    */
-  ut_pex.prototype.onMessage = function (buf) {
+  utPex.prototype.onMessage = function (buf) {
     var self = this
     var message
 
@@ -138,7 +138,7 @@ module.exports = function () {
    * Sends a PEX message to the remote peer including information about any locally
    * added / dropped peers.
    */
-  ut_pex.prototype._sendMessage = function () {
+  utPex.prototype._sendMessage = function () {
     var self = this
 
     var localAdded = Object.keys(self._localAddedPeers).slice(0, PEX_MAX_PEERS)
@@ -149,7 +149,7 @@ module.exports = function () {
 
     var addedFlags = Buffer.concat(localAdded.map(function () {
       // TODO: support flags
-      return new Buffer([0])
+      return Buffer.from([0])
     }))
 
     // update local deltas
@@ -161,11 +161,11 @@ module.exports = function () {
       'added': added,
       'added.f': addedFlags,
       'dropped': dropped,
-      'added6': new Buffer(0),
-      'added6.f': new Buffer(0),
-      'dropped6': new Buffer(0)
+      'added6': Buffer.alloc(0),
+      'added6.f': Buffer.alloc(0),
+      'dropped6': Buffer.alloc(0)
     })
   }
 
-  return ut_pex
+  return utPex
 }
