@@ -1,7 +1,5 @@
 # ut_pex [![travis][travis-image]][travis-url] [![npm][npm-image]][npm-url] [![downloads][downloads-image]][downloads-url] [![javascript style guide][standard-image]][standard-url]
 
-[![Greenkeeper badge](https://badges.greenkeeper.io/webtorrent/ut_pex.svg)](https://greenkeeper.io/)
-
 [travis-image]: https://img.shields.io/travis/webtorrent/ut_pex/master.svg
 [travis-url]: https://travis-ci.org/webtorrent/ut_pex
 [npm-image]: https://img.shields.io/npm/v/ut_pex.svg
