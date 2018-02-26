@@ -12,7 +12,7 @@ var bencode = require('bencode')
 var inherits = require('inherits')
 
 var PEX_INTERVAL = 65000 // just over one minute
-var PEX_MAX_PEERS = 50    // max number of peers to advertise per PEX message
+var PEX_MAX_PEERS = 50 // max number of peers to advertise per PEX message
 
 module.exports = function () {
   inherits(utPex, EventEmitter)

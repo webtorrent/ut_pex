@@ -11,7 +11,7 @@
     "url": "https://github.com/webtorrent/ut_pex/issues"
   },
   "dependencies": {
-    "bencode": "^1.0.0",
+    "bencode": "^2.0.0",
     "compact2string": "^1.2.0",
     "inherits": "^2.0.1",
     "string2compact": "^1.1.1"
