@@ -32,15 +32,15 @@ This package should be used with [bittorrent-protocol](https://github.com/feross
 Say you're already using `bittorrent-protocol`. Your code might look something like this:
 
 ```js
-var Protocol = require('bittorrent-protocol')
-var net = require('net')
+const Protocol = require('bittorrent-protocol')
+const net = require('net')
 
-net.createServer(function (socket) {
-  var wire = new Protocol()
+net.createServer(socket => {
+  const wire = new Protocol()
   socket.pipe(wire).pipe(socket)
 
   // handle handshake
-  wire.on('handshake', function (infoHash, peerId) {
+  wire.on('handshake', (infoHash, peerId) => {
     wire.handshake(new Buffer('my info hash'), new Buffer('my peer id'))
   })
 
@@ -50,11 +50,11 @@ net.createServer(function (socket) {
 To add support for PEX, simply modify your code like this:
 
 ```js
-var Protocol = require('bittorrent-protocol')
-var net = require('net')
-var ut_pex = require('ut_pex')
+const Protocol = require('bittorrent-protocol')
+const net = require('net')
+const ut_pex = require('ut_pex')
 
-net.createServer(function (socket) {
+net.createServer(socket => {
   var wire = new Protocol()
   socket.pipe(wire).pipe(socket)
 
@@ -67,13 +67,13 @@ net.createServer(function (socket) {
   wire.ut_pex.start()
 
   // 'peer' event will fire for every new peer sent by the remote peer
-  wire.ut_pex.on('peer', function (peer) {
+  wire.ut_pex.on('peer', peer => {
     // got a peer
     // probably add it to peer connections queue
   })
 
   // handle handshake
-  wire.on('handshake', function (infoHash, peerId) {
+  wire.on('handshake', (infoHash, peerId) => {
     wire.handshake(new Buffer('my info hash'), new Buffer('my peer id'))
   })
 
@@ -133,10 +133,10 @@ wire.ut_pex.dropPeer('127.0.0.1:6889')
 Fired for every new peer received from PEX.
 
 ```js
-wire.ut_pex.on('peer', function (peer) {
-  var parts = peer.split(':')
-  var ip = parts[0]
-  var port = parts[1]
+wire.ut_pex.on('peer', peer => {
+  const parts = peer.split(':')
+  const ip = parts[0]
+  const port = parts[1]
   // ...
 })
 ```
@@ -148,10 +148,10 @@ Note: the event will not fire if the peer does not support ut_pex or if they don
 Fired for every peer dropped from the swarm notified via PEX.
 
 ```js
-wire.ut_pex.on('dropped', function (peer) {
-  var parts = peer.split(':')
-  var ip = parts[0]
-  var port = parts[1]
+wire.ut_pex.on('dropped', peer => {
+  const parts = peer.split(':')
+  const ip = parts[0]
+  const port = parts[1]
   // ...
 })
 ```
