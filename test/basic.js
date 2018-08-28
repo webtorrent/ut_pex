@@ -1,11 +1,11 @@
 /* jshint camelcase: false */
 
-var Protocol = require('bittorrent-protocol')
-var utPex = require('../')
-var test = require('tape')
+const Protocol = require('bittorrent-protocol')
+const utPex = require('../')
+const test = require('tape')
 
-test('wire.use(ut_pex())', function (t) {
-  var wire = new Protocol()
+test('wire.use(ut_pex())', t => {
+  const wire = new Protocol()
   wire.pipe(wire)
 
   wire.use(utPex())
