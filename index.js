@@ -5,87 +5,75 @@
 // NOTE: addPeer should take in an optional second argument, flags
 // TODO: destroy wire if peer sends PEX messages too frequently
 
-var EventEmitter = require('events').EventEmitter
-var compact2string = require('compact2string')
-var string2compact = require('string2compact')
-var bencode = require('bencode')
-var inherits = require('inherits')
+const { EventEmitter } = require('events')
+const bencode = require('bencode')
+const compact2string = require('compact2string')
+const string2compact = require('string2compact')
 
-var PEX_INTERVAL = 65000 // just over one minute
-var PEX_MAX_PEERS = 50 // max number of peers to advertise per PEX message
+const PEX_INTERVAL = 65000 // just over one minute
+const PEX_MAX_PEERS = 50 // max number of peers to advertise per PEX message
 
-module.exports = function () {
-  inherits(utPex, EventEmitter)
+class utPex extends EventEmitter {
+  constructor (wire) {
+    super()
 
-  function utPex (wire) {
-    var self = this
-    EventEmitter.call(self)
+    this._wire = wire
+    this._intervalId = null
 
-    self._wire = wire
-    self._intervalId = null
-
-    self.reset()
+    this.reset()
   }
-
-  utPex.prototype.name = 'ut_pex'
 
   /**
    * Start sending regular PEX updates to remote peer.
    */
-  utPex.prototype.start = function () {
-    var self = this
-    clearInterval(self._intervalId)
-    self._intervalId = setInterval(self._sendMessage.bind(self), PEX_INTERVAL)
-    if (self._intervalId.unref) self._intervalId.unref()
+  start () {
+    clearInterval(this._intervalId)
+    this._intervalId = setInterval(this._sendMessage.bind(this), PEX_INTERVAL)
+    if (this._intervalId.unref) this._intervalId.unref()
   }
 
   /**
    * Stop sending PEX updates to the remote peer.
    */
-  utPex.prototype.stop = function () {
-    var self = this
-    clearInterval(self._intervalId)
-    self._intervalId = null
+  stop () {
+    clearInterval(this._intervalId)
+    this._intervalId = null
   }
 
   /**
    * Stops sending updates to the remote peer and resets internal state of peers seen.
    */
-  utPex.prototype.reset = function () {
-    var self = this
-    self._remoteAddedPeers = {}
-    self._remoteDroppedPeers = {}
-    self._localAddedPeers = {}
-    self._localDroppedPeers = {}
-    self.stop()
+  reset () {
+    this._remoteAddedPeers = {}
+    this._remoteDroppedPeers = {}
+    this._localAddedPeers = {}
+    this._localDroppedPeers = {}
+    this.stop()
   }
 
   /**
    * Adds a peer to the locally discovered peer list for the next PEX message.
    */
-  utPex.prototype.addPeer = function (peer) {
-    var self = this
-    if (peer.indexOf(':') < 0) return // disregard invalid peers
-    if (peer in self._remoteAddedPeers) return // never advertise peer the remote wire already sent us
-    if (peer in self._localDroppedPeers) delete self._localDroppedPeers[peer]
-    self._localAddedPeers[peer] = true
+  addPeer (peer) {
+    if (!peer.includes(':')) return // disregard invalid peers
+    if (peer in this._remoteAddedPeers) return // never advertise peer the remote wire already sent us
+    if (peer in this._localDroppedPeers) delete this._localDroppedPeers[peer]
+    this._localAddedPeers[peer] = true
   }
 
   /**
    * Adds a peer to the locally dropped peer list for the next PEX message.
    */
-  utPex.prototype.dropPeer = function (peer) {
-    var self = this
-    if (peer.indexOf(':') < 0) return // disregard invalid peers
-    if (peer in self._remoteDroppedPeers) return // never advertise peer the remote wire already sent us
-    if (peer in self._localAddedPeers) delete self._localAddedPeers[peer]
-    self._localDroppedPeers[peer] = true
+  dropPeer (peer) {
+    if (!peer.includes(':')) return // disregard invalid peers
+    if (peer in this._remoteDroppedPeers) return // never advertise peer the remote wire already sent us
+    if (peer in this._localAddedPeers) delete this._localAddedPeers[peer]
+    this._localDroppedPeers[peer] = true
   }
 
-  utPex.prototype.onExtendedHandshake = function (handshake) {
-    var self = this
+  onExtendedHandshake (handshake) {
     if (!handshake.m || !handshake.m.ut_pex) {
-      return self.emit('warning', new Error('Peer does not support ut_pex'))
+      return this.emit('warning', new Error('Peer does not support ut_pex'))
     }
   }
 
@@ -102,9 +90,8 @@ module.exports = function () {
    *
    * @param {Buffer} buf bencoded PEX dictionary
    */
-  utPex.prototype.onMessage = function (buf) {
-    var self = this
-    var message
+  onMessage (buf) {
+    let message
 
     try {
       message = bencode.decode(buf)
@@ -114,21 +101,21 @@ module.exports = function () {
     }
 
     if (message.added) {
-      compact2string.multi(message.added).forEach(function (peer) {
-        delete self._remoteDroppedPeers[peer]
-        if (!(peer in self._remoteAddedPeers)) {
-          self._remoteAddedPeers[peer] = true
-          self.emit('peer', peer)
+      compact2string.multi(message.added).forEach(peer => {
+        delete this._remoteDroppedPeers[peer]
+        if (!(peer in this._remoteAddedPeers)) {
+          this._remoteAddedPeers[peer] = true
+          this.emit('peer', peer)
         }
       })
     }
 
     if (message.dropped) {
-      compact2string.multi(message.dropped).forEach(function (peer) {
-        delete self._remoteAddedPeers[peer]
-        if (!(peer in self._remoteDroppedPeers)) {
-          self._remoteDroppedPeers[peer] = true
-          self.emit('dropped', peer)
+      compact2string.multi(message.dropped).forEach(peer => {
+        delete this._remoteAddedPeers[peer]
+        if (!(peer in this._remoteDroppedPeers)) {
+          this._remoteDroppedPeers[peer] = true
+          this.emit('dropped', peer)
         }
       })
     }
@@ -138,26 +125,22 @@ module.exports = function () {
    * Sends a PEX message to the remote peer including information about any locally
    * added / dropped peers.
    */
-  utPex.prototype._sendMessage = function () {
-    var self = this
+  _sendMessage () {
+    const localAdded = Object.keys(this._localAddedPeers).slice(0, PEX_MAX_PEERS)
+    const localDropped = Object.keys(this._localDroppedPeers).slice(0, PEX_MAX_PEERS)
 
-    var localAdded = Object.keys(self._localAddedPeers).slice(0, PEX_MAX_PEERS)
-    var localDropped = Object.keys(self._localDroppedPeers).slice(0, PEX_MAX_PEERS)
+    const added = Buffer.concat(localAdded.map(string2compact))
+    const dropped = Buffer.concat(localDropped.map(string2compact))
 
-    var added = Buffer.concat(localAdded.map(string2compact))
-    var dropped = Buffer.concat(localDropped.map(string2compact))
-
-    var addedFlags = Buffer.concat(localAdded.map(function () {
-      // TODO: support flags
-      return Buffer.from([0])
-    }))
+    const addedFlags = Buffer.concat(localAdded.map(() => // TODO: support flags
+      Buffer.from([0])))
 
     // update local deltas
-    localAdded.forEach(function (peer) { delete self._localAddedPeers[peer] })
-    localDropped.forEach(function (peer) { delete self._localDroppedPeers[peer] })
+    localAdded.forEach(peer => { delete this._localAddedPeers[peer] })
+    localDropped.forEach(peer => { delete this._localDroppedPeers[peer] })
 
     // send PEX message
-    self._wire.extended('ut_pex', {
+    this._wire.extended('ut_pex', {
       'added': added,
       'added.f': addedFlags,
       'dropped': dropped,
@@ -166,6 +149,10 @@ module.exports = function () {
       'dropped6': Buffer.alloc(0)
     })
   }
+}
 
+utPex.prototype.name = 'ut_pex'
+
+module.exports = () => {
   return utPex
 }
