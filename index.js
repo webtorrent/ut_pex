@@ -28,7 +28,7 @@ class utPex extends EventEmitter {
    */
   start () {
     clearInterval(this._intervalId)
-    this._intervalId = setInterval(this._sendMessage.bind(this), PEX_INTERVAL)
+    this._intervalId = setInterval(() => { this._sendMessage() }, PEX_INTERVAL)
     if (this._intervalId.unref) this._intervalId.unref()
   }
 
