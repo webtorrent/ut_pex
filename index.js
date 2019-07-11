@@ -158,12 +158,12 @@ module.exports = function () {
 
     // send PEX message
     self._wire.extended('ut_pex', {
-      'added': added,
+      added: added,
       'added.f': addedFlags,
-      'dropped': dropped,
-      'added6': Buffer.alloc(0),
+      dropped: dropped,
+      added6: Buffer.alloc(0),
       'added6.f': Buffer.alloc(0),
-      'dropped6': Buffer.alloc(0)
+      dropped6: Buffer.alloc(0)
     })
   }
 
