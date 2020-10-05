@@ -3,6 +3,8 @@
 var Protocol = require('bittorrent-protocol')
 var utPex = require('../')
 var test = require('tape')
+var string2compact = require('string2compact')
+var bencode = require('bencode')
 
 test('wire.use(ut_pex())', function (t) {
   var wire = new Protocol()
@@ -21,4 +23,310 @@ test('wire.use(ut_pex())', function (t) {
   t.end()
 })
 
-// TODO: more thorough unit tests
+test('should ignore when addPeer receives an invalid peer', t => {
+  const Extension = utPex()
+  const wire = new Protocol()
+  const pex = new Extension(wire)
+
+  const peer = '?'
+  pex.addPeer(peer)
+
+  t.notOk(pex._localAddedPeers[peer])
+  t.end()
+})
+
+test('should ignore when addPeer receives a peer that remote wire already sent us', t => {
+  const Extension = utPex()
+  const wire = new Protocol()
+  const pex = new Extension(wire)
+
+  const peer = '127.0.0.1:6889'
+  pex._remoteAddedPeers[peer] = true
+  pex.addPeer(peer)
+
+  t.notOk(pex._localAddedPeers[peer])
+  t.end()
+})
+
+test('should add to localAddedPeers when addPeer', t => {
+  const Extension = utPex()
+  const wire = new Protocol()
+  const pex = new Extension(wire)
+
+  const peer = '127.0.0.1:6889'
+  pex.addPeer(peer)
+
+  t.ok(pex._localAddedPeers[peer])
+  t.end()
+})
+
+test('should add to localAddedPeers and remove from localDroppedPeers when addPeer', t => {
+  const Extension = utPex()
+  const wire = new Protocol()
+  const pex = new Extension(wire)
+
+  const peer = '127.0.0.1:6889'
+  pex._localDroppedPeers[peer] = true
+  pex.addPeer(peer)
+
+  t.notOk(pex._localDroppedPeers[peer])
+  t.ok(pex._localAddedPeers[peer])
+  t.end()
+})
+
+test('should ignore when dropPeer receives an invalid peer', t => {
+  const Extension = utPex()
+  const wire = new Protocol()
+  const pex = new Extension(wire)
+
+  const peer = '?'
+  pex.dropPeer(peer)
+
+  t.notOk(pex._localDroppedPeers[peer])
+  t.end()
+})
+
+test('should ignore when dropPeer receives a peer that remote wire already sent us', t => {
+  const Extension = utPex()
+  const wire = new Protocol()
+  const pex = new Extension(wire)
+
+  const peer = '127.0.0.1:6889'
+  pex._remoteDroppedPeers[peer] = true
+  pex.dropPeer(peer)
+
+  t.notOk(pex._localDroppedPeers[peer])
+  t.end()
+})
+
+test('should add to localDroppedPeers when dropPeer', t => {
+  const Extension = utPex()
+  const wire = new Protocol()
+  const pex = new Extension(wire)
+
+  const peer = '127.0.0.1:6889'
+  pex.dropPeer(peer)
+
+  t.ok(pex._localDroppedPeers[peer])
+  t.end()
+})
+
+test('should add to localDroppedPeers and remove from localAddedPeers when dropPeer', t => {
+  const Extension = utPex()
+  const wire = new Protocol()
+  const pex = new Extension(wire)
+
+  const peer = '127.0.0.1:6889'
+  pex._localAddedPeers[peer] = true
+  pex.dropPeer(peer)
+
+  t.notOk(pex._localAddedPeers[peer])
+  t.ok(pex._localDroppedPeers[peer])
+  t.end()
+})
+
+test('should emit warning when onExtendedHandshake receives an invalid handshake', t => {
+  const Extension = utPex()
+  const wire = new Protocol()
+  const pex = new Extension(wire)
+
+  pex.on('warning', (err) => {
+    t.ok(err)
+    t.end()
+  })
+
+  const handshake = {}
+  pex.onExtendedHandshake(handshake)
+})
+
+test('should pass when onExtendedHandshake receives a valid handshake', t => {
+  const Extension = utPex()
+  const wire = new Protocol()
+  const pex = new Extension(wire)
+
+  pex.on('warning', (err) => {
+    t.fail(err)
+  })
+
+  const handshake = { m: { ut_pex: 1 } }
+  pex.onExtendedHandshake(handshake)
+
+  t.end()
+})
+
+test('should ignore when invalid message', t => {
+  const Extension = utPex()
+  const wire = new Protocol()
+  const pex = new Extension(wire)
+
+  pex.on('peer', () => {
+    t.fail()
+  })
+
+  pex.on('dropped', () => {
+    t.fail()
+  })
+
+  const buf = Buffer.from([0x00])
+  pex.onMessage(buf)
+
+  t.end()
+})
+
+// TODO: should ignore when invalid compact address in added
+// TODO: should ignore when invalid compact address in dropped
+
+test('hould ignore when added and address already in remoteAddedPeers', t => {
+  const Extension = utPex()
+  const wire = new Protocol()
+  const pex = new Extension(wire)
+
+  const peer = '127.0.0.1:6889'
+  pex._remoteAddedPeers[peer] = true
+
+  pex.on('peer', () => {
+    t.fail()
+  })
+
+  const message = bencode.encode({ added: string2compact(peer) })
+  const buf = Buffer.from(message)
+  pex.onMessage(buf)
+
+  t.end()
+})
+
+test('hould ignore when dropped and address already in remoteDroppedPeers', t => {
+  const Extension = utPex()
+  const wire = new Protocol()
+  const pex = new Extension(wire)
+
+  const peer = '127.0.0.1:6889'
+  pex._remoteDroppedPeers[peer] = true
+
+  pex.on('dropped', () => {
+    t.fail()
+  })
+
+  const message = bencode.encode({ dropped: string2compact(peer) })
+  const buf = Buffer.from(message)
+  pex.onMessage(buf)
+
+  t.end()
+})
+
+test('should pass when onMessage added', t => {
+  const Extension = utPex()
+  const wire = new Protocol()
+  const pex = new Extension(wire)
+
+  const peer = '127.0.0.1:6889'
+  pex._remoteDroppedPeers[peer] = true
+
+  pex.on('peer', (_peer) => {
+    t.equal(_peer, peer)
+    t.end()
+  })
+
+  const message = bencode.encode({ added: string2compact(peer) })
+  const buf = Buffer.from(message)
+  pex.onMessage(buf)
+
+  t.notOk(pex._remoteDroppedPeers[peer])
+  t.ok(pex._remoteAddedPeers[peer])
+})
+
+test('should pass when onMessage dropped', t => {
+  const Extension = utPex()
+  const wire = new Protocol()
+  const pex = new Extension(wire)
+
+  const peer = '127.0.0.1:6889'
+  pex._remoteAddedPeers[peer] = true
+
+  pex.on('dropped', (_peer) => {
+    t.equal(_peer, peer)
+    t.end()
+  })
+
+  const message = bencode.encode({ dropped: string2compact(peer) })
+  const buf = Buffer.from(message)
+  pex.onMessage(buf)
+
+  t.notOk(pex._remoteAddedPeers[peer])
+  t.ok(pex._remoteDroppedPeers[peer])
+})
+
+test('should sendMessage with empty added and empty dropped', t => {
+  class ProtocolMock {
+    extended (ext, obj) {
+      t.equal(ext, 'ut_pex')
+      t.deepEqual(obj, {
+        added: Buffer.alloc(0),
+        'added.f': Buffer.alloc(0),
+        dropped: Buffer.alloc(0),
+        added6: Buffer.alloc(0),
+        'added6.f': Buffer.alloc(0),
+        dropped6: Buffer.alloc(0)
+      })
+      t.end()
+    }
+  }
+
+  const Extension = utPex()
+  const wire = new ProtocolMock()
+  const pex = new Extension(wire)
+
+  pex._sendMessage()
+})
+
+test('should sendMessage with a localAdded address', t => {
+  class ProtocolMock {
+    extended (ext, obj) {
+      t.equal(ext, 'ut_pex')
+      t.deepEqual(obj, {
+        added: Buffer.from(string2compact(peer)),
+        'added.f': Buffer.from([0]),
+        dropped: Buffer.alloc(0),
+        added6: Buffer.alloc(0),
+        'added6.f': Buffer.alloc(0),
+        dropped6: Buffer.alloc(0)
+      })
+      t.end()
+    }
+  }
+
+  const Extension = utPex()
+  const wire = new ProtocolMock()
+  const pex = new Extension(wire)
+
+  const peer = '127.0.0.1:6889'
+  pex._localAddedPeers[peer] = true
+
+  pex._sendMessage()
+})
+
+test('should sendMessage with a localDropped address', t => {
+  class ProtocolMock {
+    extended (ext, obj) {
+      t.equal(ext, 'ut_pex')
+      t.deepEqual(obj, {
+        added: Buffer.alloc(0),
+        'added.f': Buffer.alloc(0),
+        dropped: Buffer.from(string2compact(peer)),
+        added6: Buffer.alloc(0),
+        'added6.f': Buffer.alloc(0),
+        dropped6: Buffer.alloc(0)
+      })
+      t.end()
+    }
+  }
+
+  const Extension = utPex()
+  const wire = new ProtocolMock()
+  const pex = new Extension(wire)
+
+  const peer = '127.0.0.1:6889'
+  pex._localDroppedPeers[peer] = true
+
+  pex._sendMessage()
+})
