@@ -112,18 +112,34 @@ wire.ut_pex.reset()
 
 ### addPeer
 
-Adds a peer to the locally discovered peer list to send with the next PEX message.
+Adds an IPv4 peer to the locally discovered peer list to send with the next PEX message.
 
 ```js
 wire.ut_pex.addPeer('127.0.0.1:6889')
 ```
 
+### addPeer6
+
+Adds an IPv6 peer to the locally discovered peer list to send with the next PEX message.
+
+```js
+wire.ut_pex.addPeer6('[::1]:6889')
+```
+
 ### dropPeer
 
-Adds a peer to the locally dropped peer list to send with the next PEX message.
+Adds an IPv4 peer to the locally dropped peer list to send with the next PEX message.
 
 ```js
 wire.ut_pex.dropPeer('127.0.0.1:6889')
+```
+
+### dropPeer6
+
+Adds an IPv6 peer to the locally dropped peer list to send with the next PEX message.
+
+```js
+wire.ut_pex.dropPeer6('[::1]:6889')
 ```
 
 ## events
@@ -164,10 +180,10 @@ Note: the event will not fire if the peer does not support ut_pex or if they don
 * ~~basic discovery~~
 * ~~basic advertisement~~
 * ~~basic unit tests~~
-* better unit tests
+* ~~better unit tests~~
 * peer flag support
 * destroy wire if peer sends PEX messages too frequently
-* ipv6 support
+* ~~ipv6 support~~
 
 ## license
 
