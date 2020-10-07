@@ -11,11 +11,13 @@
 [greenkeeper-image]: https://badges.greenkeeper.io/webtorrent/ut_pex.svg
 [greenkeeper-url]: https://greenkeeper.io/
 
-### BitTorrent Extension for Peer Discovery (PEX)
+### BitTorrent Extension for Peer Discovery (PEX) (BEP11)
 
-Node.js implementation of the ut_pex protocol, which is the most popular PEX (peer exchange) protocol used by bittorrent clients.
+Node.js implementation of the [ut_pex protocol (BEP11)](http://bittorrent.org/beps/bep_0011.html), which is the most popular PEX (peer exchange) protocol used by bittorrent clients.
 
-The purpose of this extension is to allow peers to exchange known peers directly with each other, thereby facilitating more efficient peer discovery and healthier swarms.  The best description of the (nonstandardized) ut_pex protocol I could find is in section 2.1.4.3 of this [paper](http://www.di.unipi.it/~ricci/XR-EE-LCN_2010_010.pdf).
+The purpose of this extension is to allow peers to exchange known peers directly with each other, thereby facilitating more efficient peer discovery and healthier swarms.
+
+The best description of the (nonstandardized) ut_pex protocol I could find is in section 2.1.4.3 of this [paper](http://www.di.unipi.it/~ricci/XR-EE-LCN_2010_010.pdf).
 
 Works in the browser with [browserify](http://browserify.org/)! This module is used by [WebTorrent](http://webtorrent.io).
 
@@ -67,7 +69,7 @@ net.createServer(function (socket) {
   wire.ut_pex.start()
 
   // 'peer' event will fire for every new peer sent by the remote peer
-  wire.ut_pex.on('peer', function (peer) {
+  wire.ut_pex.on('peer', function (peer, flags) {
     // got a peer
     // probably add it to peer connections queue
   })
@@ -115,7 +117,10 @@ wire.ut_pex.reset()
 Adds an IPv4 peer to the locally discovered peer list to send with the next PEX message.
 
 ```js
-wire.ut_pex.addPeer('127.0.0.1:6889')
+const peer = '127.0.0.1:6889'
+const flags = 0x06
+
+wire.ut_pex.addPeer(peer, flags)
 ```
 
 ### addPeer6
@@ -123,7 +128,10 @@ wire.ut_pex.addPeer('127.0.0.1:6889')
 Adds an IPv6 peer to the locally discovered peer list to send with the next PEX message.
 
 ```js
-wire.ut_pex.addPeer6('[::1]:6889')
+const peer = '[::1]:6889'
+const flags = 0x06
+
+wire.ut_pex.addPeer6(peer, flags)
 ```
 
 ### dropPeer
@@ -149,7 +157,7 @@ wire.ut_pex.dropPeer6('[::1]:6889')
 Fired for every new peer received from PEX.
 
 ```js
-wire.ut_pex.on('peer', function (peer) {
+wire.ut_pex.on('peer', function (peer, flags) {
   var parts = peer.split(':')
   var ip = parts[0]
   var port = parts[1]
@@ -181,7 +189,7 @@ Note: the event will not fire if the peer does not support ut_pex or if they don
 * ~~basic advertisement~~
 * ~~basic unit tests~~
 * ~~better unit tests~~
-* peer flag support
+* ~~peer flag support~~
 * destroy wire if peer sends PEX messages too frequently
 * ~~ipv6 support~~
 

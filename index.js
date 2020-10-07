@@ -1,7 +1,4 @@
 /*! ut_pex. MIT License. WebTorrent LLC <https://webtorrent.io/opensource> */
-// TODO: ipv6 support
-// TODO: parse and send peer flags (currently unused)
-// NOTE: addPeer should take in an optional second argument, flags
 // TODO: destroy wire if peer sends PEX messages too frequently
 
 var EventEmitter = require('events').EventEmitter
@@ -54,19 +51,19 @@ module.exports = () => {
     /**
      * Adds a IPv4 peer to the locally discovered peer list for the next PEX message.
      */
-    addPeer (peer) {
-      this._addPeer(peer, 4)
+    addPeer (peer, flags = 0x00) {
+      this._addPeer(peer, flags, 4)
     }
 
-    addPeer6 (peer) {
-      this._addPeer(peer, 6)
+    addPeer6 (peer, flags = 0x00) {
+      this._addPeer(peer, flags, 6)
     }
 
-    _addPeer (peer, version) {
+    _addPeer (peer, flags, version) {
       if (peer.indexOf(':') < 0) return // disregard invalid peers
       if (peer in this._remoteAddedPeers) return // never advertise peer the remote wire already sent us
       if (peer in this._localDroppedPeers) delete this._localDroppedPeers[peer]
-      this._localAddedPeers[peer] = { ip: version }
+      this._localAddedPeers[peer] = { ip: version, flags: flags }
     }
 
     /**
@@ -120,43 +117,64 @@ module.exports = () => {
       }
 
       if (message.added) {
-        compact2string.multi(message.added).forEach(peer => {
-          delete this._remoteDroppedPeers[peer]
-          if (!(peer in this._remoteAddedPeers)) {
-            this._remoteAddedPeers[peer] = { ip: 4 }
-            this.emit('peer', peer)
-          }
-        })
+        try {
+          compact2string.multi(message.added).forEach((peer, idx) => {
+            delete this._remoteDroppedPeers[peer]
+            if (!(peer in this._remoteAddedPeers)) {
+              const flags = message['added.f'][idx]
+              this._remoteAddedPeers[peer] = { ip: 4, flags: flags }
+              this.emit('peer', peer, flags)
+            }
+          })
+        } catch (err) {
+          // drop invalid messages
+          return
+        }
       }
 
       if (message.added6) {
-        compact2string.multi6(message.added6).forEach(peer => {
-          delete this._remoteDroppedPeers[peer]
-          if (!(peer in this._remoteAddedPeers)) {
-            this._remoteAddedPeers[peer] = { ip: 6 }
-            this.emit('peer', peer)
-          }
-        })
+        try {
+          compact2string.multi6(message.added6).forEach((peer, idx) => {
+            delete this._remoteDroppedPeers[peer]
+            if (!(peer in this._remoteAddedPeers)) {
+              const flags = message['added6.f'][idx]
+              this._remoteAddedPeers[peer] = { ip: 6, flags: flags }
+              this.emit('peer', peer, flags)
+            }
+          })
+        } catch (err) {
+          // drop invalid messages
+          return
+        }
       }
 
       if (message.dropped) {
-        compact2string.multi(message.dropped).forEach(peer => {
-          delete this._remoteAddedPeers[peer]
-          if (!(peer in this._remoteDroppedPeers)) {
-            this._remoteDroppedPeers[peer] = { ip: 4 }
-            this.emit('dropped', peer)
-          }
-        })
+        try {
+          compact2string.multi(message.dropped).forEach(peer => {
+            delete this._remoteAddedPeers[peer]
+            if (!(peer in this._remoteDroppedPeers)) {
+              this._remoteDroppedPeers[peer] = { ip: 4 }
+              this.emit('dropped', peer)
+            }
+          })
+        } catch (err) {
+          // drop invalid messages
+          return
+        }
       }
 
       if (message.dropped6) {
-        compact2string.multi6(message.dropped6).forEach(peer => {
-          delete this._remoteAddedPeers[peer]
-          if (!(peer in this._remoteDroppedPeers)) {
-            this._remoteDroppedPeers[peer] = { ip: 6 }
-            this.emit('dropped', peer)
-          }
-        })
+        try {
+          compact2string.multi6(message.dropped6).forEach(peer => {
+            delete this._remoteAddedPeers[peer]
+            if (!(peer in this._remoteDroppedPeers)) {
+              this._remoteDroppedPeers[peer] = { ip: 6 }
+              this.emit('dropped', peer)
+            }
+          })
+        } catch (err) {
+          // drop invalid messages
+        }
       }
     }
 
@@ -170,21 +188,37 @@ module.exports = () => {
 
       const _isIPv4 = (peers, addr) => peers[addr].ip === 4
       const _isIPv6 = (peers, addr) => peers[addr].ip === 6
+      const _flags = (peers, addr) => peers[addr].flags
 
-      const added = Buffer.concat(localAdded.filter(k => _isIPv4(this._localAddedPeers, k)).map(string2compact))
-      const added6 = Buffer.concat(localAdded.filter(k => _isIPv6(this._localAddedPeers, k)).map(string2compact))
+      const added = localAdded
+        .filter(k => _isIPv4(this._localAddedPeers, k))
+        .map(string2compact)
+        .reduce((acc, cur) => Buffer.concat([acc, cur]), Buffer.alloc(0))
 
-      const dropped = Buffer.concat(localDropped.filter(k => _isIPv4(this._localDroppedPeers, k)).map(string2compact))
-      const dropped6 = Buffer.concat(localDropped.filter(k => _isIPv6(this._localDroppedPeers, k)).map(string2compact))
+      const added6 = localAdded
+        .filter(k => _isIPv6(this._localAddedPeers, k))
+        .map(string2compact)
+        .reduce((acc, cur) => Buffer.concat([acc, cur]), Buffer.alloc(0))
 
-      // TODO: support flags
-      const addedFlags = Buffer.concat(localAdded.filter(k => _isIPv4(this._localAddedPeers, k)).map(() => {
-        return Buffer.from([0])
-      }))
+      const dropped = localDropped
+        .filter(k => _isIPv4(this._localDroppedPeers, k))
+        .map(string2compact)
+        .reduce((acc, cur) => Buffer.concat([acc, cur]), Buffer.alloc(0))
 
-      const added6Flags = Buffer.concat(localAdded.filter(k => _isIPv6(this._localAddedPeers, k)).map(() => {
-        return Buffer.from([0])
-      }))
+      const dropped6 = localDropped
+        .filter(k => _isIPv6(this._localDroppedPeers, k))
+        .map(string2compact)
+        .reduce((acc, cur) => Buffer.concat([acc, cur]), Buffer.alloc(0))
+
+      const addedFlags = localAdded
+        .filter(k => _isIPv4(this._localAddedPeers, k))
+        .map(k => _flags(this._localAddedPeers, k))
+        .reduce((acc, cur) => Buffer.from([cur]), Buffer.alloc(0))
+
+      const added6Flags = localAdded
+        .filter(k => _isIPv6(this._localAddedPeers, k))
+        .map(k => _flags(this._localAddedPeers, k))
+        .reduce((acc, cur) => Buffer.from([cur]), Buffer.alloc(0))
 
       // update local deltas
       localAdded.forEach(peer => delete this._localAddedPeers[peer])

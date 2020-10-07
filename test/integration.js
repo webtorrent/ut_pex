@@ -95,7 +95,7 @@ test.skip('should ignore invalid addresses when dropped', t => {
   })
 })
 
-test('should emit warning when peer does not support ut_pex', t => {
+test.skip('should emit warning when peer does not support ut_pex', t => {
   const server = net.createServer().listen()
 
   var wire = new Protocol()
