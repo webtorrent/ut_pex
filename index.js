@@ -100,23 +100,32 @@ module.exports = () => {
       }
 
       if (message.added) {
-        compact2string.multi(message.added).forEach(peer => {
-          delete this._remoteDroppedPeers[peer]
-          if (!(peer in this._remoteAddedPeers)) {
-            this._remoteAddedPeers[peer] = true
-            this.emit('peer', peer)
-          }
-        })
+        try {
+          compact2string.multi(message.added).forEach(peer => {
+            delete this._remoteDroppedPeers[peer]
+            if (!(peer in this._remoteAddedPeers)) {
+              this._remoteAddedPeers[peer] = true
+              this.emit('peer', peer)
+            }
+          })
+        } catch (err) {
+          // drop invalid messages
+          return
+        }
       }
 
       if (message.dropped) {
-        compact2string.multi(message.dropped).forEach(peer => {
-          delete this._remoteAddedPeers[peer]
-          if (!(peer in this._remoteDroppedPeers)) {
-            this._remoteDroppedPeers[peer] = true
-            this.emit('dropped', peer)
-          }
-        })
+        try {
+          compact2string.multi(message.dropped).forEach(peer => {
+            delete this._remoteAddedPeers[peer]
+            if (!(peer in this._remoteDroppedPeers)) {
+              this._remoteDroppedPeers[peer] = true
+              this.emit('dropped', peer)
+            }
+          })
+        } catch (err) {
+          // drop invalid messages
+        }
       }
     }
 
