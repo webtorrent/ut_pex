@@ -118,3 +118,25 @@ test.skip('should emit warning when peer does not support ut_pex', t => {
     server.close()
   })
 })
+
+test.skip('should disconnect abuser peers', t => {
+  const server = net.createServer().listen()
+
+  var wire = new Protocol()
+  wire.pipe(wire)
+
+  wire.use(utPex())
+  wire.handshake(Buffer.from('01234567890123456789'), Buffer.from('12345678901234567890'))
+
+  wire.ut_pex.on('warning', err => {
+    t.ok(err)
+    t.ok(wire.destroyed)
+    t.end()
+    server.close()
+  })
+
+  wire.once('extended', () => {
+    wire.extended('ut_pex', { added: Buffer.from([0x7f, 0x00, 0x00, 0x01, 0x1a, 0xe9]) })
+    wire.extended('ut_pex', { added: Buffer.from([0x7f, 0x00, 0x00, 0x01, 0x1a, 0xe9]) })
+  })
+})

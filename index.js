@@ -1,13 +1,13 @@
 /*! ut_pex. MIT License. WebTorrent LLC <https://webtorrent.io/opensource> */
-// TODO: destroy wire if peer sends PEX messages too frequently
 
-var EventEmitter = require('events').EventEmitter
-var compact2string = require('compact2string')
-var string2compact = require('string2compact')
-var bencode = require('bencode')
+const EventEmitter = require('events').EventEmitter
+const compact2string = require('compact2string')
+const string2compact = require('string2compact')
+const bencode = require('bencode')
 
-var PEX_INTERVAL = 65000 // just over one minute
-var PEX_MAX_PEERS = 50 // max number of peers to advertise per PEX message
+const PEX_INTERVAL = 65000 // just over one minute
+const PEX_MAX_PEERS = 50 // max number of peers to advertise per PEX message
+const PEX_MIN_ALLOWED_INTERVAL = 60000 // should not receive messages below this interval
 
 module.exports = () => {
   class utPex extends EventEmitter {
@@ -16,6 +16,7 @@ module.exports = () => {
 
       this._wire = wire
       this._intervalId = null
+      this._lastMessageTimestamp = 0
 
       this.reset()
     }
@@ -107,7 +108,18 @@ module.exports = () => {
      * @param {Buffer} buf bencoded PEX dictionary
      */
     onMessage (buf) {
-      var message
+      // check message rate
+      const currentMessageTimestamp = Date.now()
+
+      if (currentMessageTimestamp - this._lastMessageTimestamp < PEX_MIN_ALLOWED_INTERVAL) {
+        this.reset()
+        this._wire.destroy()
+        return this.emit('warning', new Error('Peer disconnected for sending PEX messages too frequently'))
+      } else {
+        this._lastMessageTimestamp = currentMessageTimestamp
+      }
+
+      let message
 
       try {
         message = bencode.decode(buf)
@@ -183,8 +195,8 @@ module.exports = () => {
      * added / dropped peers.
      */
     _sendMessage () {
-      var localAdded = Object.keys(this._localAddedPeers).slice(0, PEX_MAX_PEERS)
-      var localDropped = Object.keys(this._localDroppedPeers).slice(0, PEX_MAX_PEERS)
+      const localAdded = Object.keys(this._localAddedPeers).slice(0, PEX_MAX_PEERS)
+      const localDropped = Object.keys(this._localDroppedPeers).slice(0, PEX_MAX_PEERS)
 
       const _isIPv4 = (peers, addr) => peers[addr].ip === 4
       const _isIPv6 = (peers, addr) => peers[addr].ip === 6
