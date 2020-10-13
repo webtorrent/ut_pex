@@ -1,3 +1,4 @@
+/*! ut_pex. MIT License. WebTorrent LLC <https://webtorrent.io/opensource> */
 // TODO: ipv6 support
 // TODO: parse and send peer flags (currently unused)
 // NOTE: addPeer should take in an optional second argument, flags
