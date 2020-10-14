@@ -1,13 +1,13 @@
 /* jshint camelcase: false */
 
-var Protocol = require('bittorrent-protocol')
-var utPex = require('../')
-var test = require('tape')
-var string2compact = require('string2compact')
-var bencode = require('bencode')
+const Protocol = require('bittorrent-protocol')
+const utPex = require('../')
+const test = require('tape')
+const string2compact = require('string2compact')
+const bencode = require('bencode')
 
-test('wire.use(ut_pex())', function (t) {
-  var wire = new Protocol()
+test('wire.use(ut_pex())', (t) => {
+  const wire = new Protocol()
   wire.pipe(wire)
 
   wire.use(utPex())
@@ -69,11 +69,19 @@ test('should add to localAddedPeers when addPeer with flags', t => {
   const pex = new Extension(wire)
 
   const peer = '127.0.0.1:6889'
-  const flags = 0x06
-  pex.addPeer(peer, flags)
+  const encodedFlags = 0x06
+  const decodedFlags = {
+    prefers_encryption: false,
+    is_sender: true,
+    supports_utp: true,
+    supports_ut_holepunch: false,
+    is_reachable: false
+  }
+
+  pex.addPeer(peer, decodedFlags)
 
   t.ok(pex._localAddedPeers[peer])
-  t.equal(pex._localAddedPeers[peer].flags, flags)
+  t.equal(pex._localAddedPeers[peer].flags, encodedFlags)
   t.end()
 })
 
@@ -96,11 +104,19 @@ test('should add to localAddedPeers when addPeer6 with flags', t => {
   const pex = new Extension(wire)
 
   const peer = '[::1]:6889'
-  const flags = 0x06
-  pex.addPeer6(peer, flags)
+  const encodedFlags = 0x06
+  const decodedFlags = {
+    prefers_encryption: false,
+    is_sender: true,
+    supports_utp: true,
+    supports_ut_holepunch: false,
+    is_reachable: false
+  }
+
+  pex.addPeer6(peer, decodedFlags)
 
   t.ok(pex._localAddedPeers[peer])
-  t.equal(pex._localAddedPeers[peer].flags, flags)
+  t.equal(pex._localAddedPeers[peer].flags, encodedFlags)
   t.end()
 })
 
@@ -261,22 +277,29 @@ test('should add to remoteAddedPeers when onMessage added', t => {
   const pex = new Extension(wire)
 
   const peer = '127.0.0.1:6889'
-  const flags = 0x06
+  const encodedFlags = 0x06
+  const decodedFlags = {
+    prefers_encryption: false,
+    is_sender: true,
+    supports_utp: true,
+    supports_ut_holepunch: false,
+    is_reachable: false
+  }
 
   pex.on('peer', (_peer, _flags) => {
     t.equal(_peer, peer)
-    t.equal(_flags, flags)
+    t.deepEqual(_flags, decodedFlags)
     t.end()
   })
 
-  const message = bencode.encode({ added: string2compact(peer), 'added.f': [flags] })
+  const message = bencode.encode({ added: string2compact(peer), 'added.f': [encodedFlags] })
   const buf = Buffer.from(message)
   pex.onMessage(buf)
 
   t.notOk(pex._remoteDroppedPeers[peer])
   t.ok(pex._remoteAddedPeers[peer])
   t.equal(pex._remoteAddedPeers[peer].ip, 4)
-  t.equal(pex._remoteAddedPeers[peer].flags, flags)
+  t.equal(pex._remoteAddedPeers[peer].flags, encodedFlags)
 })
 
 test('should add to remoteAddedPeers when onMessage added6', t => {
@@ -285,22 +308,29 @@ test('should add to remoteAddedPeers when onMessage added6', t => {
   const pex = new Extension(wire)
 
   const peer = '[::1]:6889'
-  const flags = 0x06
+  const encodedFlags = 0x06
+  const decodedFlags = {
+    prefers_encryption: false,
+    is_sender: true,
+    supports_utp: true,
+    supports_ut_holepunch: false,
+    is_reachable: false
+  }
 
   pex.on('peer', (_peer, _flags) => {
     t.equal(_peer, peer)
-    t.equal(_flags, flags)
+    t.deepEqual(_flags, decodedFlags)
     t.end()
   })
 
-  const message = bencode.encode({ added6: string2compact(peer), 'added6.f': [flags] })
+  const message = bencode.encode({ added6: string2compact(peer), 'added6.f': [encodedFlags] })
   const buf = Buffer.from(message)
   pex.onMessage(buf)
 
   t.notOk(pex._remoteDroppedPeers[peer])
   t.ok(pex._remoteAddedPeers[peer])
   t.equal(pex._remoteAddedPeers[peer].ip, 6)
-  t.equal(pex._remoteAddedPeers[peer].flags, flags)
+  t.equal(pex._remoteAddedPeers[peer].flags, encodedFlags)
 })
 
 test('should ignore when onMessage dropped and address already in remoteDroppedPeers', t => {

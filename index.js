@@ -9,6 +9,14 @@ const PEX_INTERVAL = 65000 // just over one minute
 const PEX_MAX_PEERS = 50 // max number of peers to advertise per PEX message
 const PEX_MIN_ALLOWED_INTERVAL = 60000 // should not receive messages below this interval
 
+const FLAGS = {
+  prefers_encryption: 0x01,
+  is_sender: 0x02,
+  supports_utp: 0x04,
+  supports_ut_holepunch: 0x08,
+  is_reachable: 0x10
+}
+
 module.exports = () => {
   class utPex extends EventEmitter {
     constructor (wire) {
@@ -52,12 +60,15 @@ module.exports = () => {
     /**
      * Adds a IPv4 peer to the locally discovered peer list for the next PEX message.
      */
-    addPeer (peer, flags = 0x00) {
-      this._addPeer(peer, flags, 4)
+    addPeer (peer, flags = {}) {
+      this._addPeer(peer, this._encodeFlags(flags), 4)
     }
 
-    addPeer6 (peer, flags = 0x00) {
-      this._addPeer(peer, flags, 6)
+    /**
+     * Adds a IPv6 peer to the locally discovered peer list for the next PEX message.
+     */
+    addPeer6 (peer, flags = {}) {
+      this._addPeer(peer, this._encodeFlags(flags), 6)
     }
 
     _addPeer (peer, flags, version) {
@@ -74,6 +85,9 @@ module.exports = () => {
       this._dropPeer(peer, 4)
     }
 
+    /**
+     * Adds a IPv6 peer to the locally dropped peer list for the next PEX message.
+     */
     dropPeer6 (peer) {
       this._dropPeer(peer, 6)
     }
@@ -95,11 +109,6 @@ module.exports = () => {
      * PEX messages are bencoded dictionaries with the following keys:
      * 'added'     : array of peers met since last PEX message
      * 'added.f'   : array of flags per peer
-     *  '0x01'     : peer prefers encryption
-     *  '0x02'     : peer is seeder
-     *  '0x04      : peer supports uTP
-     *  '0x08      : peer supports ut_holepunch
-     *  '0x10      : peer is reachable
      * 'dropped'   : array of peers locally dropped from swarm since last PEX message
      * 'added6'    : ipv6 version of 'added'
      * 'added6.f'  : ipv6 version of 'added.f'
@@ -135,7 +144,7 @@ module.exports = () => {
             if (!(peer in this._remoteAddedPeers)) {
               const flags = message['added.f'][idx]
               this._remoteAddedPeers[peer] = { ip: 4, flags: flags }
-              this.emit('peer', peer, flags)
+              this.emit('peer', peer, this._decodeFlags(flags))
             }
           })
         } catch (err) {
@@ -151,7 +160,7 @@ module.exports = () => {
             if (!(peer in this._remoteAddedPeers)) {
               const flags = message['added6.f'][idx]
               this._remoteAddedPeers[peer] = { ip: 6, flags: flags }
-              this.emit('peer', peer, flags)
+              this.emit('peer', peer, this._decodeFlags(flags))
             }
           })
         } catch (err) {
@@ -191,6 +200,34 @@ module.exports = () => {
     }
 
     /**
+     * Decode PEX bit-flags
+     * @param {Number} flags one byte number
+     * @returns {Object} based on boolean properties
+     */
+    _decodeFlags (flags) {
+      return {
+        prefers_encryption: !!(flags & FLAGS.prefers_encryption),
+        is_sender: !!(flags & FLAGS.is_sender),
+        supports_utp: !!(flags & FLAGS.supports_utp),
+        supports_ut_holepunch: !!(flags & FLAGS.supports_ut_holepunch),
+        is_reachable: !!(flags & FLAGS.is_reachable)
+      }
+    }
+
+    /**
+     * Emcode PEX bit-flags
+     * @param {Object} flags  based on boolean properties
+     * @returns {Number} one byte number
+     */
+    _encodeFlags (flags) {
+      return Object.keys(flags).reduce((acc, cur) => {
+        return (flags[cur] === true)
+          ? acc | FLAGS[cur]
+          : acc
+      }, 0x00)
+    }
+
+    /**
      * Sends a PEX message to the remote peer including information about any locally
      * added / dropped peers.
      */
@@ -201,6 +238,8 @@ module.exports = () => {
       const _isIPv4 = (peers, addr) => peers[addr].ip === 4
       const _isIPv6 = (peers, addr) => peers[addr].ip === 6
       const _flags = (peers, addr) => peers[addr].flags
+
+      // TODO: extract ipv4 and ipv6 locaAddedPeers and localDroppedPeers (DRY)
 
       const added = localAdded
         .filter(k => _isIPv4(this._localAddedPeers, k))

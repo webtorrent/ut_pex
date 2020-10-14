@@ -34,15 +34,15 @@ This package should be used with [bittorrent-protocol](https://github.com/feross
 Say you're already using `bittorrent-protocol`. Your code might look something like this:
 
 ```js
-var Protocol = require('bittorrent-protocol')
-var net = require('net')
+const Protocol = require('bittorrent-protocol')
+const net = require('net')
 
-net.createServer(function (socket) {
-  var wire = new Protocol()
+net.createServer(socket => {
+  const wire = new Protocol()
   socket.pipe(wire).pipe(socket)
 
   // handle handshake
-  wire.on('handshake', function (infoHash, peerId) {
+  wire.on('handshake', (infoHash, peerId) => {
     wire.handshake(new Buffer('my info hash'), new Buffer('my peer id'))
   })
 
@@ -52,12 +52,12 @@ net.createServer(function (socket) {
 To add support for PEX, simply modify your code like this:
 
 ```js
-var Protocol = require('bittorrent-protocol')
-var net = require('net')
-var ut_pex = require('ut_pex')
+const Protocol = require('bittorrent-protocol')
+const net = require('net')
+const ut_pex = require('ut_pex')
 
-net.createServer(function (socket) {
-  var wire = new Protocol()
+net.createServer(socket => {
+  const wire = new Protocol()
   socket.pipe(wire).pipe(socket)
 
   // initialize the extension
@@ -69,13 +69,13 @@ net.createServer(function (socket) {
   wire.ut_pex.start()
 
   // 'peer' event will fire for every new peer sent by the remote peer
-  wire.ut_pex.on('peer', function (peer, flags) {
+  wire.ut_pex.on('peer', (peer, flags) => {
     // got a peer
     // probably add it to peer connections queue
   })
 
   // handle handshake
-  wire.on('handshake', function (infoHash, peerId) {
+  wire.on('handshake', (infoHash, peerId) => {
     wire.handshake(new Buffer('my info hash'), new Buffer('my peer id'))
   })
 
@@ -118,7 +118,13 @@ Adds an IPv4 peer to the locally discovered peer list to send with the next PEX 
 
 ```js
 const peer = '127.0.0.1:6889'
-const flags = 0x06
+const flags = {
+  prefers_encryption: false,
+  is_sender: true,
+  supports_utp: true,
+  supports_ut_holepunch: false,
+  is_reachable: false
+}
 
 wire.ut_pex.addPeer(peer, flags)
 ```
@@ -129,7 +135,13 @@ Adds an IPv6 peer to the locally discovered peer list to send with the next PEX 
 
 ```js
 const peer = '[::1]:6889'
-const flags = 0x06
+const flags = {
+  prefers_encryption: false,
+  is_sender: true,
+  supports_utp: true,
+  supports_ut_holepunch: false,
+  is_reachable: false
+}
 
 wire.ut_pex.addPeer6(peer, flags)
 ```
@@ -157,10 +169,10 @@ wire.ut_pex.dropPeer6('[::1]:6889')
 Fired for every new peer received from PEX.
 
 ```js
-wire.ut_pex.on('peer', function (peer, flags) {
-  var parts = peer.split(':')
-  var ip = parts[0]
-  var port = parts[1]
+wire.ut_pex.on('peer', (peer, flags) => {
+  const parts = peer.split(':')
+  const ip = parts[0]
+  const port = parts[1]
   // ...
 })
 ```
@@ -172,26 +184,29 @@ Note: the event will not fire if the peer does not support ut_pex or if they don
 Fired for every peer dropped from the swarm notified via PEX.
 
 ```js
-wire.ut_pex.on('dropped', function (peer) {
-  var parts = peer.split(':')
-  var ip = parts[0]
-  var port = parts[1]
+wire.ut_pex.on('dropped', peer => {
+  const parts = peer.split(':')
+  const ip = parts[0]
+  const port = parts[1]
   // ...
 })
 ```
 
 Note: the event will not fire if the peer does not support ut_pex or if they don't respond.
 
-## todo
-(prioritized highest to lowest)
+## flags
 
-* ~~basic discovery~~
-* ~~basic advertisement~~
-* ~~basic unit tests~~
-* ~~better unit tests~~
-* ~~peer flag support~~
-* ~~destroy wire if peer sends PEX messages too frequently~~
-* ~~ipv6 support~~
+In order to handle [ut_pex protocol (BEP11)](http://bittorrent.org/beps/bep_0011.html) bit-flags in a more humand friendly format, the given boolean based Object has been defined.
+
+```js
+const flags = {
+  prefers_encryption: Boolean,
+  is_sender: Boolean,
+  supports_utp: Boolean,
+  supports_ut_holepunch: Boolean,
+  is_reachable: Boolean
+}
+```
 
 ## license
 
