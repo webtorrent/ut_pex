@@ -445,6 +445,35 @@ test('should _sendMessage when a localAdded has an IPv4 address', t => {
   pex._sendMessage()
 })
 
+test('should _sendMessage when multiple localAdded IPv4 addresses', t => {
+  class ProtocolMock {
+    extended (ext, obj) {
+      t.equal(ext, 'ut_pex')
+      t.deepEqual(obj, {
+        added: Buffer.from(string2compact([peerA, peerB])),
+        'added.f': Buffer.from([0x06, 0x06]),
+        dropped: Buffer.alloc(0),
+        added6: Buffer.alloc(0),
+        'added6.f': Buffer.alloc(0),
+        dropped6: Buffer.alloc(0)
+      })
+      t.end()
+    }
+  }
+
+  const Extension = utPex()
+  const wire = new ProtocolMock()
+  const pex = new Extension(wire)
+
+  const peerA = '127.0.0.1:6889'
+  pex._localAddedPeers[peerA] = { ip: 4, flags: 0x06 }
+
+  const peerB = '127.0.0.1:6890'
+  pex._localAddedPeers[peerB] = { ip: 4, flags: 0x06 }
+
+  pex._sendMessage()
+})
+
 test('should _sendMessage when a localAdded has an IPv6 address', t => {
   class ProtocolMock {
     extended (ext, obj) {
@@ -467,6 +496,35 @@ test('should _sendMessage when a localAdded has an IPv6 address', t => {
 
   const peer = '[::1]:6889'
   pex._localAddedPeers[peer] = { ip: 6, flags: 0x06 }
+
+  pex._sendMessage()
+})
+
+test('should _sendMessage when multiple localAdded IPv6 addresses', t => {
+  class ProtocolMock {
+    extended (ext, obj) {
+      t.equal(ext, 'ut_pex')
+      t.deepEqual(obj, {
+        added: Buffer.alloc(0),
+        'added.f': Buffer.alloc(0),
+        dropped: Buffer.alloc(0),
+        added6: Buffer.from(string2compact([peerA, peerB])),
+        'added6.f': Buffer.from([0x06, 0x06]),
+        dropped6: Buffer.alloc(0)
+      })
+      t.end()
+    }
+  }
+
+  const Extension = utPex()
+  const wire = new ProtocolMock()
+  const pex = new Extension(wire)
+
+  const peerA = '[::1]:6889'
+  pex._localAddedPeers[peerA] = { ip: 6, flags: 0x06 }
+
+  const peerB = '[::1]:6890'
+  pex._localAddedPeers[peerB] = { ip: 6, flags: 0x06 }
 
   pex._sendMessage()
 })
