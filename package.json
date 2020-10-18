@@ -17,6 +17,7 @@
   },
   "devDependencies": {
     "bittorrent-protocol": "^3.0.0",
+    "nyc": "^15.1.0",
     "standard": "*",
     "tape": "^4.5.1"
   },

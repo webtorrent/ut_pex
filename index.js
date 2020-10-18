@@ -1,16 +1,21 @@
 /*! ut_pex. MIT License. WebTorrent LLC <https://webtorrent.io/opensource> */
-// TODO: ipv6 support
-// TODO: parse and send peer flags (currently unused)
-// NOTE: addPeer should take in an optional second argument, flags
-// TODO: destroy wire if peer sends PEX messages too frequently
 
-var EventEmitter = require('events').EventEmitter
-var compact2string = require('compact2string')
-var string2compact = require('string2compact')
-var bencode = require('bencode')
+const EventEmitter = require('events').EventEmitter
+const compact2string = require('compact2string')
+const string2compact = require('string2compact')
+const bencode = require('bencode')
 
-var PEX_INTERVAL = 65000 // just over one minute
-var PEX_MAX_PEERS = 50 // max number of peers to advertise per PEX message
+const PEX_INTERVAL = 65000 // just over one minute
+const PEX_MAX_PEERS = 50 // max number of peers to advertise per PEX message
+const PEX_MIN_ALLOWED_INTERVAL = 60000 // should not receive messages below this interval
+
+const FLAGS = {
+  prefers_encryption: 0x01,
+  is_sender: 0x02,
+  supports_utp: 0x04,
+  supports_ut_holepunch: 0x08,
+  is_reachable: 0x10
+}
 
 module.exports = () => {
   class utPex extends EventEmitter {
@@ -19,6 +24,7 @@ module.exports = () => {
 
       this._wire = wire
       this._intervalId = null
+      this._lastMessageTimestamp = 0
 
       this.reset()
     }
@@ -52,23 +58,45 @@ module.exports = () => {
     }
 
     /**
-     * Adds a peer to the locally discovered peer list for the next PEX message.
+     * Adds a IPv4 peer to the locally discovered peer list for the next PEX message.
      */
-    addPeer (peer) {
-      if (peer.indexOf(':') < 0) return // disregard invalid peers
-      if (peer in this._remoteAddedPeers) return // never advertise peer the remote wire already sent us
-      if (peer in this._localDroppedPeers) delete this._localDroppedPeers[peer]
-      this._localAddedPeers[peer] = true
+    addPeer (peer, flags = {}) {
+      this._addPeer(peer, this._encodeFlags(flags), 4)
     }
 
     /**
-     * Adds a peer to the locally dropped peer list for the next PEX message.
+     * Adds a IPv6 peer to the locally discovered peer list for the next PEX message.
+     */
+    addPeer6 (peer, flags = {}) {
+      this._addPeer(peer, this._encodeFlags(flags), 6)
+    }
+
+    _addPeer (peer, flags, version) {
+      if (peer.indexOf(':') < 0) return // disregard invalid peers
+      if (peer in this._remoteAddedPeers) return // never advertise peer the remote wire already sent us
+      if (peer in this._localDroppedPeers) delete this._localDroppedPeers[peer]
+      this._localAddedPeers[peer] = { ip: version, flags: flags }
+    }
+
+    /**
+     * Adds a IPv4 peer to the locally dropped peer list for the next PEX message.
      */
     dropPeer (peer) {
+      this._dropPeer(peer, 4)
+    }
+
+    /**
+     * Adds a IPv6 peer to the locally dropped peer list for the next PEX message.
+     */
+    dropPeer6 (peer) {
+      this._dropPeer(peer, 6)
+    }
+
+    _dropPeer (peer, version) {
       if (peer.indexOf(':') < 0) return // disregard invalid peers
       if (peer in this._remoteDroppedPeers) return // never advertise peer the remote wire already sent us
       if (peer in this._localAddedPeers) delete this._localAddedPeers[peer]
-      this._localDroppedPeers[peer] = true
+      this._localDroppedPeers[peer] = { ip: version }
     }
 
     onExtendedHandshake (handshake) {
@@ -81,53 +109,102 @@ module.exports = () => {
      * PEX messages are bencoded dictionaries with the following keys:
      * 'added'     : array of peers met since last PEX message
      * 'added.f'   : array of flags per peer
-     *  '0x01'     : peer prefers encryption
-     *  '0x02'     : peer is seeder
      * 'dropped'   : array of peers locally dropped from swarm since last PEX message
      * 'added6'    : ipv6 version of 'added'
      * 'added6.f'  : ipv6 version of 'added.f'
-     * 'dropped.f' : ipv6 version of 'dropped'
+     * 'dropped6'  : ipv6 version of 'dropped'
      *
      * @param {Buffer} buf bencoded PEX dictionary
      */
     onMessage (buf) {
-      var message
+      // check message rate
+      const currentMessageTimestamp = Date.now()
+
+      if (currentMessageTimestamp - this._lastMessageTimestamp < PEX_MIN_ALLOWED_INTERVAL) {
+        this.reset()
+        this._wire.destroy()
+        return this.emit('warning', new Error('Peer disconnected for sending PEX messages too frequently'))
+      } else {
+        this._lastMessageTimestamp = currentMessageTimestamp
+      }
+
+      let message
 
       try {
         message = bencode.decode(buf)
-      } catch (err) {
-        // drop invalid messages
-        return
-      }
 
-      if (message.added) {
-        try {
-          compact2string.multi(message.added).forEach(peer => {
+        if (message.added) {
+          compact2string.multi(message.added).forEach((peer, idx) => {
             delete this._remoteDroppedPeers[peer]
             if (!(peer in this._remoteAddedPeers)) {
-              this._remoteAddedPeers[peer] = true
-              this.emit('peer', peer)
+              const flags = message['added.f'][idx]
+              this._remoteAddedPeers[peer] = { ip: 4, flags: flags }
+              this.emit('peer', peer, this._decodeFlags(flags))
             }
           })
-        } catch (err) {
-          // drop invalid messages
-          return
         }
-      }
 
-      if (message.dropped) {
-        try {
+        if (message.added6) {
+          compact2string.multi6(message.added6).forEach((peer, idx) => {
+            delete this._remoteDroppedPeers[peer]
+            if (!(peer in this._remoteAddedPeers)) {
+              const flags = message['added6.f'][idx]
+              this._remoteAddedPeers[peer] = { ip: 6, flags: flags }
+              this.emit('peer', peer, this._decodeFlags(flags))
+            }
+          })
+        }
+
+        if (message.dropped) {
           compact2string.multi(message.dropped).forEach(peer => {
             delete this._remoteAddedPeers[peer]
             if (!(peer in this._remoteDroppedPeers)) {
-              this._remoteDroppedPeers[peer] = true
+              this._remoteDroppedPeers[peer] = { ip: 4 }
               this.emit('dropped', peer)
             }
           })
-        } catch (err) {
-          // drop invalid messages
         }
+
+        if (message.dropped6) {
+          compact2string.multi6(message.dropped6).forEach(peer => {
+            delete this._remoteAddedPeers[peer]
+            if (!(peer in this._remoteDroppedPeers)) {
+              this._remoteDroppedPeers[peer] = { ip: 6 }
+              this.emit('dropped', peer)
+            }
+          })
+        }
+      } catch (err) {
+        // drop invalid messages
       }
+    }
+
+    /**
+     * Decode PEX bit-flags
+     * @param {Number} flags one byte number
+     * @returns {Object} based on boolean properties
+     */
+    _decodeFlags (flags) {
+      return {
+        prefers_encryption: !!(flags & FLAGS.prefers_encryption),
+        is_sender: !!(flags & FLAGS.is_sender),
+        supports_utp: !!(flags & FLAGS.supports_utp),
+        supports_ut_holepunch: !!(flags & FLAGS.supports_ut_holepunch),
+        is_reachable: !!(flags & FLAGS.is_reachable)
+      }
+    }
+
+    /**
+     * Emcode PEX bit-flags
+     * @param {Object} flags  based on boolean properties
+     * @returns {Number} one byte number
+     */
+    _encodeFlags (flags) {
+      return Object.keys(flags).reduce((acc, cur) => {
+        return (flags[cur] === true)
+          ? acc | FLAGS[cur]
+          : acc
+      }, 0x00)
     }
 
     /**
@@ -135,16 +212,36 @@ module.exports = () => {
      * added / dropped peers.
      */
     _sendMessage () {
-      var localAdded = Object.keys(this._localAddedPeers).slice(0, PEX_MAX_PEERS)
-      var localDropped = Object.keys(this._localDroppedPeers).slice(0, PEX_MAX_PEERS)
+      const localAdded = Object.keys(this._localAddedPeers).slice(0, PEX_MAX_PEERS)
+      const localDropped = Object.keys(this._localDroppedPeers).slice(0, PEX_MAX_PEERS)
 
-      var added = Buffer.concat(localAdded.map(string2compact))
-      var dropped = Buffer.concat(localDropped.map(string2compact))
+      const _isIPv4 = (peers, addr) => peers[addr].ip === 4
+      const _isIPv6 = (peers, addr) => peers[addr].ip === 6
+      const _flags = (peers, addr) => peers[addr].flags
 
-      var addedFlags = Buffer.concat(localAdded.map(() => {
-        // TODO: support flags
-        return Buffer.from([0])
-      }))
+      const added = string2compact(
+        localAdded.filter(k => _isIPv4(this._localAddedPeers, k))
+      )
+
+      const added6 = string2compact(
+        localAdded.filter(k => _isIPv6(this._localAddedPeers, k))
+      )
+
+      const dropped = string2compact(
+        localDropped.filter(k => _isIPv4(this._localDroppedPeers, k))
+      )
+
+      const dropped6 = string2compact(
+        localDropped.filter(k => _isIPv6(this._localDroppedPeers, k))
+      )
+
+      const addedFlags = Buffer.from(
+        localAdded.filter(k => _isIPv4(this._localAddedPeers, k)).map(k => _flags(this._localAddedPeers, k))
+      )
+
+      const added6Flags = Buffer.from(
+        localAdded.filter(k => _isIPv6(this._localAddedPeers, k)).map(k => _flags(this._localAddedPeers, k))
+      )
 
       // update local deltas
       localAdded.forEach(peer => delete this._localAddedPeers[peer])
@@ -155,9 +252,9 @@ module.exports = () => {
         added: added,
         'added.f': addedFlags,
         dropped: dropped,
-        added6: Buffer.alloc(0),
-        'added6.f': Buffer.alloc(0),
-        dropped6: Buffer.alloc(0)
+        added6: added6,
+        'added6.f': added6Flags,
+        dropped6: dropped6
       })
     }
   }
