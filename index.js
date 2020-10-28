@@ -10,11 +10,11 @@ const PEX_MAX_PEERS = 50 // max number of peers to advertise per PEX message
 const PEX_MIN_ALLOWED_INTERVAL = 60000 // should not receive messages below this interval
 
 const FLAGS = {
-  prefers_encryption: 0x01,
-  is_sender: 0x02,
-  supports_utp: 0x04,
-  supports_ut_holepunch: 0x08,
-  is_reachable: 0x10
+  prefersEncryption: 0x01,
+  isSender: 0x02,
+  supportsUtp: 0x04,
+  supportsUtHolepunch: 0x08,
+  isReachable: 0x10
 }
 
 module.exports = () => {
@@ -186,11 +186,11 @@ module.exports = () => {
      */
     _decodeFlags (flags) {
       return {
-        prefers_encryption: !!(flags & FLAGS.prefers_encryption),
-        is_sender: !!(flags & FLAGS.is_sender),
-        supports_utp: !!(flags & FLAGS.supports_utp),
-        supports_ut_holepunch: !!(flags & FLAGS.supports_ut_holepunch),
-        is_reachable: !!(flags & FLAGS.is_reachable)
+        prefersEncryption: !!(flags & FLAGS.prefersEncryption),
+        isSender: !!(flags & FLAGS.isSender),
+        supportsUtp: !!(flags & FLAGS.supportsUtp),
+        supportsUtHolepunch: !!(flags & FLAGS.supportsUtHolepunch),
+        isReachable: !!(flags & FLAGS.isReachable)
       }
     }
 
