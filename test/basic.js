@@ -202,13 +202,13 @@ test('should add to localDroppedPeers and remove from localAddedPeers when dropP
 // onExtendedHandshake
 
 test('should emit warning when onExtendedHandshake receives an invalid handshake', t => {
+  t.plan(1)
   const Extension = utPex()
   const wire = new Protocol()
   const pex = new Extension(wire)
 
   pex.on('warning', (err) => {
     t.ok(err)
-    t.end()
   })
 
   const handshake = {}
@@ -272,6 +272,7 @@ test('hould ignore when onMessage added and address already in remoteAddedPeers'
 })
 
 test('should add to remoteAddedPeers when onMessage added', t => {
+  t.plan(6)
   const Extension = utPex()
   const wire = new Protocol()
   const pex = new Extension(wire)
@@ -289,7 +290,6 @@ test('should add to remoteAddedPeers when onMessage added', t => {
   pex.on('peer', (_peer, _flags) => {
     t.equal(_peer, peer)
     t.deepEqual(_flags, decodedFlags)
-    t.end()
   })
 
   const message = bencode.encode({ added: string2compact(peer), 'added.f': [encodedFlags] })
@@ -303,6 +303,8 @@ test('should add to remoteAddedPeers when onMessage added', t => {
 })
 
 test('should add to remoteAddedPeers when onMessage added6', t => {
+  t.plan(6)
+
   const Extension = utPex()
   const wire = new Protocol()
   const pex = new Extension(wire)
@@ -320,7 +322,6 @@ test('should add to remoteAddedPeers when onMessage added6', t => {
   pex.on('peer', (_peer, _flags) => {
     t.equal(_peer, peer)
     t.deepEqual(_flags, decodedFlags)
-    t.end()
   })
 
   const message = bencode.encode({ added6: string2compact(peer), 'added6.f': [encodedFlags] })
@@ -353,6 +354,8 @@ test('should ignore when onMessage dropped and address already in remoteDroppedP
 })
 
 test('should add to remoteDroppedPeers when onMessage dropped', t => {
+  t.plan(3)
+
   const Extension = utPex()
   const wire = new Protocol()
   const pex = new Extension(wire)
@@ -362,7 +365,6 @@ test('should add to remoteDroppedPeers when onMessage dropped', t => {
 
   pex.on('dropped', (_peer) => {
     t.equal(_peer, peer)
-    t.end()
   })
 
   const message = bencode.encode({ dropped: string2compact(peer) })
@@ -374,6 +376,8 @@ test('should add to remoteDroppedPeers when onMessage dropped', t => {
 })
 
 test('should add to remoteDroppedPeers when onMessage dropped6', t => {
+  t.plan(3)
+
   const Extension = utPex()
   const wire = new Protocol()
   const pex = new Extension(wire)
@@ -383,7 +387,6 @@ test('should add to remoteDroppedPeers when onMessage dropped6', t => {
 
   pex.on('dropped', (_peer) => {
     t.equal(_peer, peer)
-    t.end()
   })
 
   const message = bencode.encode({ dropped6: string2compact(peer) })
@@ -397,6 +400,8 @@ test('should add to remoteDroppedPeers when onMessage dropped6', t => {
 // _sendMessage
 
 test('should _sendMessage with empty added and empty dropped', t => {
+  t.plan(2)
+
   class ProtocolMock {
     extended (ext, obj) {
       t.equal(ext, 'ut_pex')
@@ -408,7 +413,6 @@ test('should _sendMessage with empty added and empty dropped', t => {
         'added6.f': Buffer.alloc(0),
         dropped6: Buffer.alloc(0)
       })
-      t.end()
     }
   }
 
@@ -420,6 +424,8 @@ test('should _sendMessage with empty added and empty dropped', t => {
 })
 
 test('should _sendMessage when a localAdded has an IPv4 address', t => {
+  t.plan(2)
+
   class ProtocolMock {
     extended (ext, obj) {
       t.equal(ext, 'ut_pex')
@@ -431,7 +437,6 @@ test('should _sendMessage when a localAdded has an IPv4 address', t => {
         'added6.f': Buffer.alloc(0),
         dropped6: Buffer.alloc(0)
       })
-      t.end()
     }
   }
 
@@ -446,6 +451,8 @@ test('should _sendMessage when a localAdded has an IPv4 address', t => {
 })
 
 test('should _sendMessage when multiple localAdded IPv4 addresses', t => {
+  t.plan(2)
+
   class ProtocolMock {
     extended (ext, obj) {
       t.equal(ext, 'ut_pex')
@@ -457,7 +464,6 @@ test('should _sendMessage when multiple localAdded IPv4 addresses', t => {
         'added6.f': Buffer.alloc(0),
         dropped6: Buffer.alloc(0)
       })
-      t.end()
     }
   }
 
@@ -475,6 +481,8 @@ test('should _sendMessage when multiple localAdded IPv4 addresses', t => {
 })
 
 test('should _sendMessage when a localAdded has an IPv6 address', t => {
+  t.plan(2)
+
   class ProtocolMock {
     extended (ext, obj) {
       t.equal(ext, 'ut_pex')
@@ -486,7 +494,6 @@ test('should _sendMessage when a localAdded has an IPv6 address', t => {
         'added6.f': Buffer.from([0x06]),
         dropped6: Buffer.alloc(0)
       })
-      t.end()
     }
   }
 
@@ -501,6 +508,8 @@ test('should _sendMessage when a localAdded has an IPv6 address', t => {
 })
 
 test('should _sendMessage when multiple localAdded IPv6 addresses', t => {
+  t.plan(2)
+
   class ProtocolMock {
     extended (ext, obj) {
       t.equal(ext, 'ut_pex')
@@ -512,7 +521,6 @@ test('should _sendMessage when multiple localAdded IPv6 addresses', t => {
         'added6.f': Buffer.from([0x06, 0x06]),
         dropped6: Buffer.alloc(0)
       })
-      t.end()
     }
   }
 
@@ -530,6 +538,8 @@ test('should _sendMessage when multiple localAdded IPv6 addresses', t => {
 })
 
 test('should _sendMessage when a localDropped has an IPv4 address', t => {
+  t.plan(2)
+
   class ProtocolMock {
     extended (ext, obj) {
       t.equal(ext, 'ut_pex')
@@ -541,7 +551,6 @@ test('should _sendMessage when a localDropped has an IPv4 address', t => {
         'added6.f': Buffer.alloc(0),
         dropped6: Buffer.alloc(0)
       })
-      t.end()
     }
   }
 
@@ -556,6 +565,8 @@ test('should _sendMessage when a localDropped has an IPv4 address', t => {
 })
 
 test('should _sendMessage when a localDropped has an IPv6 address', t => {
+  t.plan(2)
+
   class ProtocolMock {
     extended (ext, obj) {
       t.equal(ext, 'ut_pex')
@@ -567,7 +578,6 @@ test('should _sendMessage when a localDropped has an IPv6 address', t => {
         'added6.f': Buffer.alloc(0),
         dropped6: Buffer.from(string2compact(peer))
       })
-      t.end()
     }
   }
 
