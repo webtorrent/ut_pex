@@ -71,11 +71,11 @@ test('should add to localAddedPeers when addPeer with flags', t => {
   const peer = '127.0.0.1:6889'
   const encodedFlags = 0x06
   const decodedFlags = {
-    prefers_encryption: false,
-    is_sender: true,
-    supports_utp: true,
-    supports_ut_holepunch: false,
-    is_reachable: false
+    prefersEncryption: false,
+    isSender: true,
+    supportsUtp: true,
+    supportsUtHolepunch: false,
+    isReachable: false
   }
 
   pex.addPeer(peer, decodedFlags)
@@ -106,11 +106,11 @@ test('should add to localAddedPeers when addPeer6 with flags', t => {
   const peer = '[::1]:6889'
   const encodedFlags = 0x06
   const decodedFlags = {
-    prefers_encryption: false,
-    is_sender: true,
-    supports_utp: true,
-    supports_ut_holepunch: false,
-    is_reachable: false
+    prefersEncryption: false,
+    isSender: true,
+    supportsUtp: true,
+    supportsUtHolepunch: false,
+    isReachable: false
   }
 
   pex.addPeer6(peer, decodedFlags)
@@ -280,11 +280,11 @@ test('should add to remoteAddedPeers when onMessage added', t => {
   const peer = '127.0.0.1:6889'
   const encodedFlags = 0x06
   const decodedFlags = {
-    prefers_encryption: false,
-    is_sender: true,
-    supports_utp: true,
-    supports_ut_holepunch: false,
-    is_reachable: false
+    prefersEncryption: false,
+    isSender: true,
+    supportsUtp: true,
+    supportsUtHolepunch: false,
+    isReachable: false
   }
 
   pex.on('peer', (_peer, _flags) => {
@@ -312,11 +312,11 @@ test('should add to remoteAddedPeers when onMessage added6', t => {
   const peer = '[::1]:6889'
   const encodedFlags = 0x06
   const decodedFlags = {
-    prefers_encryption: false,
-    is_sender: true,
-    supports_utp: true,
-    supports_ut_holepunch: false,
-    is_reachable: false
+    prefersEncryption: false,
+    isSender: true,
+    supportsUtp: true,
+    supportsUtHolepunch: false,
+    isReachable: false
   }
 
   pex.on('peer', (_peer, _flags) => {

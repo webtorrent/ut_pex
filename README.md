@@ -119,11 +119,11 @@ Adds an IPv4 peer to the locally discovered peer list to send with the next PEX 
 ```js
 const peer = '127.0.0.1:6889'
 const flags = {
-  prefers_encryption: false,
-  is_sender: true,
-  supports_utp: true,
-  supports_ut_holepunch: false,
-  is_reachable: false
+  prefersEncryption: false,
+  isSender: true,
+  supportsUtp: true,
+  supportsUtHolepunch: false,
+  isReachable: false
 }
 
 wire.ut_pex.addPeer(peer, flags)
@@ -136,11 +136,11 @@ Adds an IPv6 peer to the locally discovered peer list to send with the next PEX 
 ```js
 const peer = '[::1]:6889'
 const flags = {
-  prefers_encryption: false,
-  is_sender: true,
-  supports_utp: true,
-  supports_ut_holepunch: false,
-  is_reachable: false
+  prefersEncryption: false,
+  isSender: true,
+  supportsUtp: true,
+  supportsUtHolepunch: false,
+  isReachable: false
 }
 
 wire.ut_pex.addPeer6(peer, flags)
@@ -200,11 +200,11 @@ In order to handle [ut_pex protocol (BEP11)](http://bittorrent.org/beps/bep_0011
 
 ```js
 const flags = {
-  prefers_encryption: Boolean,
-  is_sender: Boolean,
-  supports_utp: Boolean,
-  supports_ut_holepunch: Boolean,
-  is_reachable: Boolean
+  prefersEncryption: Boolean,
+  isSender: Boolean,
+  supportsUtp: Boolean,
+  supportsUtHolepunch: Boolean,
+  isReachable: Boolean
 }
 ```
 
