@@ -72,7 +72,7 @@ module.exports = () => {
     }
 
     _addPeer (peer, flags, version) {
-      if (peer.indexOf(':') < 0) return // disregard invalid peers
+      if (!peer.includes(':')) return // disregard invalid peers
       if (peer in this._remoteAddedPeers) return // never advertise peer the remote wire already sent us
       if (peer in this._localDroppedPeers) delete this._localDroppedPeers[peer]
       this._localAddedPeers[peer] = { ip: version, flags: flags }
@@ -93,7 +93,7 @@ module.exports = () => {
     }
 
     _dropPeer (peer, version) {
-      if (peer.indexOf(':') < 0) return // disregard invalid peers
+      if (!peer.includes(':')) return // disregard invalid peers
       if (peer in this._remoteDroppedPeers) return // never advertise peer the remote wire already sent us
       if (peer in this._localAddedPeers) delete this._localAddedPeers[peer]
       this._localDroppedPeers[peer] = { ip: version }
@@ -200,11 +200,9 @@ module.exports = () => {
      * @returns {Number} one byte number
      */
     _encodeFlags (flags) {
-      return Object.keys(flags).reduce((acc, cur) => {
-        return (flags[cur] === true)
-          ? acc | FLAGS[cur]
-          : acc
-      }, 0x00)
+      return Object.keys(flags).reduce((acc, cur) => (flags[cur] === true)
+        ? acc | FLAGS[cur]
+        : acc, 0x00)
     }
 
     /**
