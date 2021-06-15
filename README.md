@@ -1,15 +1,13 @@
-# ut_pex [![travis][travis-image]][travis-url] [![npm][npm-image]][npm-url] [![downloads][downloads-image]][downloads-url] [![javascript style guide][standard-image]][standard-url] [![Greenkeeper badge][greenkeeper-image]][greenkeeper-url]
+# ut_pex [![ci][ci-image]][ci-url] [![npm][npm-image]][npm-url] [![downloads][downloads-image]][downloads-url] [![javascript style guide][standard-image]][standard-url]
 
-[travis-image]: https://img.shields.io/travis/webtorrent/ut_pex/master.svg
-[travis-url]: https://travis-ci.org/webtorrent/ut_pex
+[ci-image]: https://github.com/webtorrent/ut_pex/actions/workflows/ci.yml/badge.svg
+[ci-url]: https://github.com/webtorrent/ut_pex/actions/workflows/ci.yml
 [npm-image]: https://img.shields.io/npm/v/ut_pex.svg
 [npm-url]: https://npmjs.org/package/ut_pex
 [downloads-image]: https://img.shields.io/npm/dm/ut_pex.svg
 [downloads-url]: https://npmjs.org/package/ut_pex
 [standard-image]: https://img.shields.io/badge/code_style-standard-brightgreen.svg
 [standard-url]: https://standardjs.com
-[greenkeeper-image]: https://badges.greenkeeper.io/webtorrent/ut_pex.svg
-[greenkeeper-url]: https://greenkeeper.io/
 
 ### BitTorrent Extension for Peer Discovery (PEX) (BEP11)
 
