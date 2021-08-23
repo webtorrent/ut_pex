@@ -19,7 +19,7 @@
     "@webtorrent/semantic-release-config": "1.0.7",
     "bittorrent-protocol": "3.4.3",
     "nyc": "15.1.0",
-    "semantic-release": "17.4.5",
+    "semantic-release": "17.4.6",
     "standard": "*",
     "tape": "5.3.1"
   },
