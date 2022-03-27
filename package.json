@@ -17,7 +17,7 @@
   },
   "devDependencies": {
     "@webtorrent/semantic-release-config": "1.0.7",
-    "bittorrent-protocol": "3.5.1",
+    "bittorrent-protocol": "3.5.2",
     "nyc": "15.1.0",
     "semantic-release": "17.4.7",
     "standard": "*",
