@@ -1,9 +1,9 @@
 /*! ut_pex. MIT License. WebTorrent LLC <https://webtorrent.io/opensource> */
 
-const EventEmitter = require('events').EventEmitter
-const compact2string = require('compact2string')
-const string2compact = require('string2compact')
-const bencode = require('bencode')
+import { EventEmitter } from 'events'
+import compact2string from 'compact2string'
+import string2compact from 'string2compact'
+import bencode from 'bencode'
 
 const PEX_INTERVAL = 65000 // just over one minute
 const PEX_MAX_PEERS = 50 // max number of peers to advertise per PEX message
@@ -17,7 +17,7 @@ const FLAGS = {
   isReachable: 0x10
 }
 
-module.exports = () => {
+export default () => {
   class utPex extends EventEmitter {
     constructor (wire) {
       super()
@@ -75,7 +75,7 @@ module.exports = () => {
       if (!peer.includes(':')) return // disregard invalid peers
       if (peer in this._remoteAddedPeers) return // never advertise peer the remote wire already sent us
       if (peer in this._localDroppedPeers) delete this._localDroppedPeers[peer]
-      this._localAddedPeers[peer] = { ip: version, flags: flags }
+      this._localAddedPeers[peer] = { ip: version, flags }
     }
 
     /**
@@ -138,7 +138,7 @@ module.exports = () => {
             delete this._remoteDroppedPeers[peer]
             if (!(peer in this._remoteAddedPeers)) {
               const flags = message['added.f'][idx]
-              this._remoteAddedPeers[peer] = { ip: 4, flags: flags }
+              this._remoteAddedPeers[peer] = { ip: 4, flags }
               this.emit('peer', peer, this._decodeFlags(flags))
             }
           })
@@ -149,7 +149,7 @@ module.exports = () => {
             delete this._remoteDroppedPeers[peer]
             if (!(peer in this._remoteAddedPeers)) {
               const flags = message['added6.f'][idx]
-              this._remoteAddedPeers[peer] = { ip: 6, flags: flags }
+              this._remoteAddedPeers[peer] = { ip: 6, flags }
               this.emit('peer', peer, this._decodeFlags(flags))
             }
           })
@@ -247,12 +247,12 @@ module.exports = () => {
 
       // send PEX message
       this._wire.extended('ut_pex', {
-        added: added,
+        added,
         'added.f': addedFlags,
-        dropped: dropped,
-        added6: added6,
+        dropped,
+        added6,
         'added6.f': added6Flags,
-        dropped6: dropped6
+        dropped6
       })
     }
   }

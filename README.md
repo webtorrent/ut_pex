@@ -32,8 +32,8 @@ This package should be used with [bittorrent-protocol](https://github.com/feross
 Say you're already using `bittorrent-protocol`. Your code might look something like this:
 
 ```js
-const Protocol = require('bittorrent-protocol')
-const net = require('net')
+import Protocol from 'bittorrent-protocol'
+import net from 'net'
 
 net.createServer(socket => {
   const wire = new Protocol()
@@ -50,9 +50,9 @@ net.createServer(socket => {
 To add support for PEX, simply modify your code like this:
 
 ```js
-const Protocol = require('bittorrent-protocol')
-const net = require('net')
-const ut_pex = require('ut_pex')
+import Protocol from 'bittorrent-protocol'
+import net from 'net'
+import ut_pex from 'ut_pex'
 
 net.createServer(socket => {
   const wire = new Protocol()
