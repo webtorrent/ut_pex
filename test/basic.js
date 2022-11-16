@@ -1,10 +1,10 @@
 /* jshint camelcase: false */
 
-const Protocol = require('bittorrent-protocol')
-const utPex = require('../')
-const test = require('tape')
-const string2compact = require('string2compact')
-const bencode = require('bencode')
+import Protocol from 'bittorrent-protocol'
+import utPex from '../index.js'
+import test from 'tape'
+import string2compact from 'string2compact'
+import bencode from 'bencode'
 
 test('wire.use(ut_pex())', (t) => {
   const wire = new Protocol()
@@ -258,7 +258,7 @@ test('hould ignore when onMessage added and address already in remoteAddedPeers'
 
   const peer = '127.0.0.1:6889'
   const flags = 0x06
-  pex._remoteAddedPeers[peer] = { ip: 4, flags: flags }
+  pex._remoteAddedPeers[peer] = { ip: 4, flags }
 
   pex.on('peer', () => {
     t.fail()

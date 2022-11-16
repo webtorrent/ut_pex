@@ -10,6 +10,7 @@
   "bugs": {
     "url": "https://github.com/webtorrent/ut_pex/issues"
   },
+  "type": "module",
   "dependencies": {
     "bencode": "^2.0.2",
     "compact2string": "^1.4.1",
@@ -34,7 +35,12 @@
     "ut_pex"
   ],
   "license": "MIT",
-  "main": "index.js",
+  "engines": {
+    "node": ">=12.20.0"
+  },
+  "exports": {
+    "import": "./index.js"
+  },
   "repository": {
     "type": "git",
     "url": "git://github.com/webtorrent/ut_pex.git"
