@@ -1,3 +1,15 @@
+# [4.0.0](https://github.com/webtorrent/ut_pex/compare/v3.0.2...v4.0.0) (2022-11-16)
+
+
+### Features
+
+* esm ([#57](https://github.com/webtorrent/ut_pex/issues/57)) ([bbdeae1](https://github.com/webtorrent/ut_pex/commit/bbdeae13298617bd0a503f189ae23d4c26f80d96))
+
+
+### BREAKING CHANGES
+
+* ESM only
+
 ## [3.0.2](https://github.com/webtorrent/ut_pex/compare/v3.0.1...v3.0.2) (2021-08-04)
 
 
