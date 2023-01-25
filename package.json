@@ -1,7 +1,7 @@
 {
   "name": "ut_pex",
   "description": "Extension for Peer Discovery (PEX)",
-  "version": "4.0.0",
+  "version": "4.0.1",
   "author": {
     "name": "WebTorrent LLC",
     "email": "feross@webtorrent.io",
