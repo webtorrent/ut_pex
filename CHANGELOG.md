@@ -1,3 +1,10 @@
+## [4.0.3](https://github.com/webtorrent/ut_pex/compare/v4.0.2...v4.0.3) (2023-01-25)
+
+
+### Bug Fixes
+
+* **deps:** update dependency string2compact to ^2.0.1 ([#66](https://github.com/webtorrent/ut_pex/issues/66)) ([cdd1665](https://github.com/webtorrent/ut_pex/commit/cdd16652a8b2ebd022bc41ef975eb87e70bdeb8f))
+
 ## [4.0.2](https://github.com/webtorrent/ut_pex/compare/v4.0.1...v4.0.2) (2023-01-25)
 
 
