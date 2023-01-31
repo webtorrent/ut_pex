@@ -12,13 +12,13 @@
   },
   "type": "module",
   "dependencies": {
-    "bencode": "^3.0.0",
+    "bencode": "^3.0.3",
     "compact2string": "^1.4.1",
     "string2compact": "^2.0.1"
   },
   "devDependencies": {
     "@webtorrent/semantic-release-config": "1.0.8",
-    "bittorrent-protocol": "4.1.2",
+    "bittorrent-protocol": "4.1.4",
     "nyc": "15.1.0",
     "semantic-release": "20.1.0",
     "standard": "*",
