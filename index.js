@@ -134,7 +134,7 @@ export default () => {
         message = bencode.decode(buf)
 
         if (message.added) {
-          compact2string.multi(message.added).forEach((peer, idx) => {
+          compact2string.multi(Buffer.from(message.added)).forEach((peer, idx) => {
             delete this._remoteDroppedPeers[peer]
             if (!(peer in this._remoteAddedPeers)) {
               const flags = message['added.f'][idx]
@@ -145,7 +145,7 @@ export default () => {
         }
 
         if (message.added6) {
-          compact2string.multi6(message.added6).forEach((peer, idx) => {
+          compact2string.multi6(Buffer.from(message.added6)).forEach((peer, idx) => {
             delete this._remoteDroppedPeers[peer]
             if (!(peer in this._remoteAddedPeers)) {
               const flags = message['added6.f'][idx]
@@ -156,7 +156,7 @@ export default () => {
         }
 
         if (message.dropped) {
-          compact2string.multi(message.dropped).forEach(peer => {
+          compact2string.multi(Buffer.from(message.dropped)).forEach(peer => {
             delete this._remoteAddedPeers[peer]
             if (!(peer in this._remoteDroppedPeers)) {
               this._remoteDroppedPeers[peer] = { ip: 4 }
@@ -166,7 +166,7 @@ export default () => {
         }
 
         if (message.dropped6) {
-          compact2string.multi6(message.dropped6).forEach(peer => {
+          compact2string.multi6(Buffer.from(message.dropped6)).forEach(peer => {
             delete this._remoteAddedPeers[peer]
             if (!(peer in this._remoteDroppedPeers)) {
               this._remoteDroppedPeers[peer] = { ip: 6 }
