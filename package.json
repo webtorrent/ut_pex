@@ -17,7 +17,7 @@
     "string2compact": "^2.0.1"
   },
   "devDependencies": {
-    "@webtorrent/semantic-release-config": "1.0.9",
+    "@webtorrent/semantic-release-config": "1.0.10",
     "bittorrent-protocol": "4.1.8",
     "nyc": "15.1.0",
     "semantic-release": "21.0.7",
