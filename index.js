@@ -148,7 +148,7 @@ export default () => {
           compact2string.multi6(Buffer.from(message.added6)).forEach((peer, idx) => {
             delete this._remoteDroppedPeers[peer]
             if (!(peer in this._remoteAddedPeers)) {
-              const flags = message['added6.f'] ? message['added6.f'][idx] : undefined
+              const flags = message['added6.f']?.[idx]
               this._remoteAddedPeers[peer] = { ip: 6, flags }
               this.emit('peer', peer, this._decodeFlags(flags))
             }
