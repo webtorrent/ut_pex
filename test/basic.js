@@ -302,6 +302,36 @@ test('should add to remoteAddedPeers when onMessage added', t => {
   t.equal(pex._remoteAddedPeers[peer].flags, encodedFlags)
 })
 
+test('should add to remoteAddedPeers when onMessage includes added without flags', t => {
+  t.plan(6)
+  const Extension = utPex()
+  const wire = new Protocol()
+  const pex = new Extension(wire)
+
+  const peer = '127.0.0.1:6889'
+  const decodedFlags = {
+    prefersEncryption: false,
+    isSender: false,
+    supportsUtp: false,
+    supportsUtHolepunch: false,
+    isReachable: false
+  }
+
+  pex.on('peer', (_peer, _flags) => {
+    t.equal(_peer, peer)
+    t.deepEqual(_flags, decodedFlags)
+  })
+
+  const message = bencode.encode({ added: string2compact(peer) })
+  const buf = Buffer.from(message)
+  pex.onMessage(buf)
+
+  t.notOk(pex._remoteDroppedPeers[peer])
+  t.ok(pex._remoteAddedPeers[peer])
+  t.equal(pex._remoteAddedPeers[peer].ip, 4)
+  t.equal(pex._remoteAddedPeers[peer].flags, undefined)
+})
+
 test('should add to remoteAddedPeers when onMessage added6', t => {
   t.plan(6)
 
@@ -332,6 +362,37 @@ test('should add to remoteAddedPeers when onMessage added6', t => {
   t.ok(pex._remoteAddedPeers[peer])
   t.equal(pex._remoteAddedPeers[peer].ip, 6)
   t.equal(pex._remoteAddedPeers[peer].flags, encodedFlags)
+})
+
+test('should add to removeAddedPeers when onMessage includes added6 without flags', t => {
+  t.plan(6)
+
+  const Extension = utPex()
+  const wire = new Protocol()
+  const pex = new Extension(wire)
+
+  const peer = '[::1]:6889'
+  const decodedFlags = {
+    prefersEncryption: false,
+    isSender: false,
+    supportsUtp: false,
+    supportsUtHolepunch: false,
+    isReachable: false
+  }
+
+  pex.on('peer', (_peer, _flags) => {
+    t.equal(_peer, peer)
+    t.deepEqual(_flags, decodedFlags)
+  })
+
+  const message = bencode.encode({ added6: string2compact(peer) })
+  const buf = Buffer.from(message)
+  pex.onMessage(buf)
+
+  t.notOk(pex._remoteDroppedPeers[peer])
+  t.ok(pex._remoteAddedPeers[peer])
+  t.equal(pex._remoteAddedPeers[peer].ip, 6)
+  t.equal(pex._remoteAddedPeers[peer].flags, undefined)
 })
 
 test('should ignore when onMessage dropped and address already in remoteDroppedPeers', t => {
