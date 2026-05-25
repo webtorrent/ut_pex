@@ -1,3 +1,10 @@
+## [5.0.2](https://github.com/webtorrent/ut_pex/compare/v5.0.1...v5.0.2) (2026-05-25)
+
+
+### Bug Fixes
+
+* **deps:** update dependency bencode to ^4.0.1 ([#138](https://github.com/webtorrent/ut_pex/issues/138)) ([7a17d0e](https://github.com/webtorrent/ut_pex/commit/7a17d0e7c682780dba9487e532c8bed48fbd6fab))
+
 ## [5.0.1](https://github.com/webtorrent/ut_pex/compare/v5.0.0...v5.0.1) (2026-05-25)
 
 
