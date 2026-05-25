@@ -1,3 +1,15 @@
+# [5.0.0](https://github.com/webtorrent/ut_pex/compare/v4.0.4...v5.0.0) (2026-05-25)
+
+
+### Features
+
+* **ci:** Add Node.js version 12 and 24 to CI workflow ([#135](https://github.com/webtorrent/ut_pex/issues/135)) ([e717f81](https://github.com/webtorrent/ut_pex/commit/e717f8122d675da75807d4e14755e0f57618f136))
+
+
+### BREAKING CHANGES
+
+* **ci:** Allow for added.f and added6.f to be optional
+
 ## [4.0.4](https://github.com/webtorrent/ut_pex/compare/v4.0.3...v4.0.4) (2023-08-10)
 
 
