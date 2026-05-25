@@ -12,7 +12,7 @@
   },
   "type": "module",
   "dependencies": {
-    "bencode": "^4.0.0",
+    "bencode": "^4.0.1",
     "compact2string": "^1.4.1",
     "string2compact": "^2.0.2"
   },
