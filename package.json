@@ -14,7 +14,7 @@
   "dependencies": {
     "bencode": "^4.0.0",
     "compact2string": "^1.4.1",
-    "string2compact": "^2.0.1"
+    "string2compact": "^2.0.2"
   },
   "devDependencies": {
     "@webtorrent/semantic-release-config": "1.0.11",
